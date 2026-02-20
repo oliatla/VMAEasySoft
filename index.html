@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasySoft 8 - Kennsluvefur</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Opna valmynd">
+        <span></span>
+    </button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" style="text-decoration: none; color: inherit;">
+                    <div class="logo">
+                        <div class="logo-icon">ES</div>
+                        <div class="logo-text">
+                            <h1>EasySoft 8</h1>
+                            <span>Kennsluvefur</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>Framvinda</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+
+            <nav class="nav-section">
+                <!-- Navbar er byggður sjálfkrafa af JavaScript -->
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <!-- Hero Section -->
+                <section class="hero">
+                    <div class="hero-icon">🔧</div>
+                    <h1>Velkomin í EasySoft 8 kennsluvef</h1>
+                    <p>
+                        Lærðu að forrita PLC vélar með LADDER aðferð. Þessi kennsluvefur leiðir þig skref fyrir skref 
+                        frá grunnuppsetningu til fullkominnar SET/RESET mótorstýringar.
+                    </p>
+                    <a href="kafli1/1-1-ip-tala.html" class="start-btn">
+                        <span>🚀</span> Byrja nám
+                    </a>
+                </section>
+
+                <!-- Chapter Cards -->
+                <div class="chapter-cards">
+                    <a href="kafli1/1-1-ip-tala.html" class="chapter-card">
+                        <div class="chapter-card-icon">⚙️</div>
+                        <div class="chapter-card-content">
+                            <h3>Kafli 1: Uppsetning vélar</h3>
+                            <p>Lærðu að stilla IP tölu, raða einingum og tengja EasySoft við PLC vélina.</p>
+                            <span class="chapter-card-lessons">3 kennslustundir • ~35 mínútur</span>
+                        </div>
+                    </a>
+
+                    <a href="kafli2/2-1-set.html" class="chapter-card">
+                        <div class="chapter-card-icon">⚡</div>
+                        <div class="chapter-card-content">
+                            <h3>Kafli 2: SET/RESET aðferð</h3>
+                            <p>Skildu hvernig SET og RESET blokkir virka og hvernig þær eru notaðar saman til að stýra mótoraum.</p>
+                            <span class="chapter-card-lessons">4 kennslustundir • ~80 mínútur</span>
+                        </div>
+                    </a>
+
+                    <a href="kafli3/3-1-ls-blokk.html" class="chapter-card">
+                        <div class="chapter-card-icon">🧮</div>
+                        <div class="chapter-card-content">
+                            <h3>Kafli 3: Blokkir</h3>
+                            <p>Lærðu um LS, CP, A blokkir, teljara (C), tímarafla (T), multiplexer (MX) og hvernig markerar virka.</p>
+                            <span class="chapter-card-lessons">7 kennslustundir • ~2 klst</span>
+                        </div>
+                    </a>
+
+                    <a href="upprifjun/blokkir.html" class="chapter-card">
+                        <div class="chapter-card-icon">📚</div>
+                        <div class="chapter-card-content">
+                            <h3>Upprifjun og blokkir</h3>
+                            <p>Fljótleg uppfletting á öllum blokkum og aðferðum sem þú hefur lært.</p>
+                            <span class="chapter-card-lessons">Tilvísunarhandbók</span>
+                        </div>
+                    </a>
+
+                    <a href="ladder-builder.html" class="chapter-card" style="border: 2px solid var(--accent);">
+                        <div class="chapter-card-icon">🔧</div>
+                        <div class="chapter-card-content">
+                            <h3>LADDER Builder</h3>
+                            <p>Smíðaðu þína eigin LADDER rás með drag-and-drop. 4 inngangar, 4 útgangar, Make/Break snertir og SET/RESET spólur.</p>
+                            <span class="chapter-card-lessons">Gagnvirkt verkfæri</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="site-footer">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <img src="images/foa-logo.png" alt="FÓA" class="footer-logo">
+                        <div class="footer-info">
+                            <span class="footer-author">Friðrik Óli Atlason</span>
+                            <span class="footer-desc">EasySoft 8 Kennsluvefur</span>
+                        </div>
+                    </div>
+                    <div class="footer-links">
+                        <a href="https://github.com/fridrikoli/easysoft-kennsla" target="_blank" rel="noopener">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script src="js/nav-config.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

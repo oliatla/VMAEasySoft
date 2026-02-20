@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2.3 SET og RESET saman - EasySoft 8</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Opna valmynd"><span></span></button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html" style="text-decoration: none; color: inherit;">
+                    <div class="logo">
+                        <div class="logo-icon">ES</div>
+                        <div class="logo-text"><h1>EasySoft 8</h1><span>Kennsluvefur</span></div>
+                    </div>
+                </a>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label"><span>Framvinda</span><span id="progress-percent">0%</span></div>
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            </div>
+            <nav class="nav-section">
+                <!-- Navbar er byggður sjálfkrafa af JavaScript -->
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-wrapper">
+                <header class="lesson-header">
+                    <div class="breadcrumb">
+                        <a href="../index.html">Forsíða</a><span>›</span><span>Kafli 2: SET/RESET</span><span>›</span><span>SET og RESET saman</span>
+                    </div>
+                    <h1 class="lesson-title">SET og RESET saman</h1>
+                    <div class="lesson-meta">
+                        <div class="meta-item"><span class="meta-icon">📖</span><span>Kafli 2.3</span></div>
+                        <div class="meta-item"><span class="meta-icon">⏱️</span><span>~20 mínútur</span></div>
+                        <div class="meta-item"><span class="meta-icon">🎯</span><span>Miðlungs</span></div>
+                    </div>
+                </header>
+
+                <div class="lesson-content">
+                    <section class="content-section">
+                        <h2 class="section-title">START/STOP rás</h2>
+                        <p class="content-text">
+                            Algengasta notkun SET og RESET er að búa til START/STOP rás fyrir mótor eða annað tæki. 
+                            Þetta er eins og klassískur rofamynstur í iðnaði.
+                        </p>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Dæmi: Mótorstýring</h2>
+                        
+                        <div class="ladder-diagram">
+                            <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.85rem;">Heildarmynd af START/STOP rás:</p>
+                            
+                            <div style="margin-bottom: 1rem;">
+                                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.5rem;">Rung 1: START (SET)</p>
+                                <div class="ladder-rung" style="display: flex; align-items: center; justify-content: space-between; padding: 0 1rem;">
+                                    <div class="ladder-rail left" style="position: relative; width: 4px; height: 60px; background: var(--ladder-rail);"></div>
+                                    <div class="ladder-wire" style="width: 30px;"></div>
+                                    <div class="ladder-contact" id="combo-start" onclick="comboStart()">I0.0</div>
+                                    <div class="ladder-wire" style="flex: 1;"></div>
+                                    <div class="ladder-coil set" id="combo-set-coil">S Q0.0</div>
+                                    <div class="ladder-wire" style="width: 30px;"></div>
+                                    <div class="ladder-rail right" style="position: relative; width: 4px; height: 60px; background: var(--ladder-rail);"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 0.5rem;">Rung 2: STOP (RESET)</p>
+                                <div class="ladder-rung" style="display: flex; align-items: center; justify-content: space-between; padding: 0 1rem;">
+                                    <div class="ladder-rail left" style="position: relative; width: 4px; height: 60px; background: var(--ladder-rail);"></div>
+                                    <div class="ladder-wire" style="width: 30px;"></div>
+                                    <div class="ladder-contact" id="combo-stop" onclick="comboStop()">I0.1</div>
+                                    <div class="ladder-wire" style="flex: 1;"></div>
+                                    <div class="ladder-coil reset" id="combo-reset-coil">R Q0.0</div>
+                                    <div class="ladder-wire" style="width: 30px;"></div>
+                                    <div class="ladder-rail right" style="position: relative; width: 4px; height: 60px; background: var(--ladder-rail);"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="demo-container">
+                            <div class="demo-title">Prófa START/STOP rás</div>
+                            <div class="demo-controls">
+                                <button class="demo-btn set-btn" id="combo-start-btn" onclick="comboStart()">
+                                    <span>▶️</span> START (I0.0)
+                                </button>
+                                <button class="demo-btn reset-btn" id="combo-stop-btn" onclick="comboStop()">
+                                    <span>⏹️</span> STOP (I0.1)
+                                </button>
+                            </div>
+                            <div class="demo-output">
+                                <div class="output-indicator" id="combo-output">🔌</div>
+                                <div class="output-label">
+                                    <div class="state">MÓTOR Q0.0: <span id="combo-state">STÖÐVAÐUR</span></div>
+                                    <div class="description">Þrífasa mótor</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Forgangur: RESET vinnur</h2>
+                        <p class="content-text">
+                            Í flestum PLC kerfum hefur RESET <strong>forgang</strong> yfir SET. Þetta þýðir að ef bæði eru virk á sama tíma, 
+                            þá vinnur RESET og útgangurinn fer í OFF.
+                        </p>
+                        <p class="content-text">
+                            Þetta er mikilvægt öryggisatriði – við viljum alltaf geta stöðvað vélar, jafnvel þótt eitthvað annað sé að reyna að kveikja á þeim.
+                        </p>
+
+                        <div class="info-box tip">
+                            <span class="info-box-icon">💡</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Góð venja</div>
+                                <p class="info-box-text">
+                                    Settu alltaf RESET línuna <strong>eftir</strong> SET línuna í forritinu. Þannig hefur RESET alltaf forgang.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Raunverulegt dæmi</h2>
+                        
+                        <div class="image-placeholder">
+                            <div class="image-placeholder-icon">📷</div>
+                            <p class="image-placeholder-text">Hér kemur skjáskot af SET/RESET rás í EasySoft</p>
+                            <span class="image-placeholder-label">set-reset-ras-easysoft.png</span>
+                        </div>
+
+                        <p class="content-text">Í raunveruleikanum myndir þú tengja:</p>
+                        <ul class="content-list">
+                            <li><strong>I0.0</strong> = Grænn START takki</li>
+                            <li><strong>I0.1</strong> = Rauður STOP takki (eða neyðarstöðvun)</li>
+                            <li><strong>Q0.0</strong> = Tengi (contactor) sem kveikir á mótor</li>
+                        </ul>
+                    </section>
+                </div>
+
+                <nav class="lesson-nav">
+                    <a href="2-2-reset.html" class="nav-btn prev">
+                        <span class="nav-btn-icon">←</span>
+                        <span class="nav-btn-text"><span class="nav-btn-label">Fyrra</span><span class="nav-btn-title">Hvað er RESET?</span></span>
+                    </a>
+                    <a href="2-4-aefingar.html" class="nav-btn next" onclick="markLessonComplete('2-3')">
+                        <span class="nav-btn-icon">→</span>
+                        <span class="nav-btn-text"><span class="nav-btn-label">Næsta</span><span class="nav-btn-title">Æfingar</span></span>
+                    </a>
+                </nav>
+            </div>
+        
+            <!-- Footer -->
+            <footer class="site-footer">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <img src="../images/foa-logo.png" alt="FÓA" class="footer-logo">
+                        <div class="footer-info">
+                            <span class="footer-author">Friðrik Óli Atlason</span>
+                            <span class="footer-desc">EasySoft 8 Kennsluvefur</span>
+                        </div>
+                    </div>
+                    <div class="footer-links">
+                        <a href="https://github.com/fridrikoli/easysoft-kennsla" target="_blank" rel="noopener">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="../js/nav-config.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!-- 
+    SIDEBAR SNIÐMÁT
+    Navbar er byggður sjálfkrafa af JavaScript (main.js + nav-config.js)
+    Afritaðu þetta á allar síður
+-->
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <a href="../index.html" style="text-decoration: none; color: inherit;">
+            <div class="logo">
+                <div class="logo-icon">ES</div>
+                <div class="logo-text">
+                    <h1>EasySoft 8</h1>
+                    <span>Kennsluvefur</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="progress-container">
+        <div class="progress-label">
+            <span>Framvinda</span>
+            <span id="progress-percent">0%</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+    </div>
+    <nav class="nav-section">
+        <!-- Navbar er byggður sjálfkrafa af JavaScript -->
+    </nav>
+</aside>
+
+<!-- 
+    SCRIPTS - Bæta við í lok <body>:
+    
+    Fyrir síður í undirmöppum (kafli1, kafli2, kafli3, upprifjun):
+    <script src="../js/nav-config.js"></script>
+    <script src="../js/main.js"></script>
+    
+    Fyrir index.html (rótarmappa):
+    <script src="js/nav-config.js"></script>
+    <script src="js/main.js"></script>
+-->

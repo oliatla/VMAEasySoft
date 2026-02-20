@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1.3 Online og Download - EasySoft 8</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Opna valmynd">
+        <span></span>
+    </button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html" style="text-decoration: none; color: inherit;">
+                    <div class="logo">
+                        <div class="logo-icon">ES</div>
+                        <div class="logo-text">
+                            <h1>EasySoft 8</h1>
+                            <span>Kennsluvefur</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>Framvinda</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+            <nav class="nav-section">
+                <!-- Navbar er byggður sjálfkrafa af JavaScript -->
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-wrapper">
+                <header class="lesson-header">
+                    <div class="breadcrumb">
+                        <a href="../index.html">Forsíða</a><span>›</span><span>Kafli 1</span><span>›</span><span>Online og Download</span>
+                    </div>
+                    <h1 class="lesson-title">Online og Download</h1>
+                    <div class="lesson-meta">
+                        <div class="meta-item"><span class="meta-icon">📖</span><span>Kafli 1.3</span></div>
+                        <div class="meta-item"><span class="meta-icon">⏱️</span><span>~15 mínútur</span></div>
+                        <div class="meta-item"><span class="meta-icon">🎯</span><span>Byrjandi</span></div>
+                    </div>
+                </header>
+
+                <div class="lesson-content">
+                    <section class="content-section">
+                        <h2 class="section-title">Yfirlit</h2>
+                        <p class="content-text">
+                            Þegar þú hefur skrifað forrit í EasySoft þarftu að senda það yfir á PLC vélina. 
+                            Við tengjumst vélunum í gegnum WiFi og sendum forritið þaðan.
+                        </p>
+                        
+                        <div class="demo-container">
+                            <div class="demo-title">Ferlið í hnotskurn</div>
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1.5rem; flex-wrap: wrap;">
+                                <div style="text-align: center; background: var(--border); padding: 1rem; border-radius: 8px; min-width: 80px;">
+                                    <div style="font-size: 1.5rem;">📶</div>
+                                    <div style="font-size: 0.75rem; margin-top: 0.5rem;">WiFi</div>
+                                </div>
+                                <div style="font-size: 1.5rem; color: var(--text-muted);">→</div>
+                                <div style="text-align: center; background: var(--border); padding: 1rem; border-radius: 8px; min-width: 80px;">
+                                    <div style="font-size: 1.5rem;">🔌</div>
+                                    <div style="font-size: 0.75rem; margin-top: 0.5rem;">Tengja</div>
+                                </div>
+                                <div style="font-size: 1.5rem; color: var(--text-muted);">→</div>
+                                <div style="text-align: center; background: var(--border); padding: 1rem; border-radius: 8px; min-width: 80px;">
+                                    <div style="font-size: 1.5rem;">📥</div>
+                                    <div style="font-size: 0.75rem; margin-top: 0.5rem;">Download</div>
+                                </div>
+                                <div style="font-size: 1.5rem; color: var(--text-muted);">→</div>
+                                <div style="text-align: center; background: var(--success); padding: 1rem; border-radius: 8px; min-width: 80px; color: var(--bg-dark);">
+                                    <div style="font-size: 1.5rem;">👁️</div>
+                                    <div style="font-size: 0.75rem; margin-top: 0.5rem;">Online</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Skref 1: Tengjast IoT netinu</h2>
+                        <p class="content-text">
+                            PLC vélarnar eru tengdar við IoT netið okkar með snúru. Þú þarft að tengja tölvuna þína 
+                            við sama net í gegnum WiFi til að geta átt samskipti við þær.
+                        </p>
+
+                        <div class="info-box tip" style="background: linear-gradient(135deg, rgba(0, 102, 204, 0.15), rgba(0, 102, 204, 0.05)); border-color: var(--primary);">
+                            <span class="info-box-icon">📶</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">WiFi upplýsingar fyrir C03</div>
+                                <p class="info-box-text" style="font-size: 1.1rem;">
+                                    <strong>Nafn nets:</strong> <code style="background: var(--bg-dark); padding: 0.2rem 0.5rem; border-radius: 4px;">IoT-C03</code><br>
+                                    <strong>Lykilorð:</strong> <code style="background: var(--bg-dark); padding: 0.2rem 0.5rem; border-radius: 4px;">Snjalli03</code>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="step-list">
+                            <div class="step-item">
+                                <div class="step-content">
+                                    <div class="step-title">Opnaðu WiFi stillingar á tölvunni</div>
+                                    <p class="step-text">Smelltu á WiFi táknið í Windows og finndu <strong>IoT-C03</strong> netið.</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-content">
+                                    <div class="step-title">Tengdu við netið</div>
+                                    <p class="step-text">Sláðu inn lykilorðið <strong>Snjalli03</strong> og bíddu eftir tengingu.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="image-placeholder">
+                            <div class="image-placeholder-icon">📷</div>
+                            <p class="image-placeholder-text">Hér kemur skjáskot af WiFi tengingu við IoT-C03</p>
+                            <span class="image-placeholder-label">wifi-iot-c03.png</span>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Skref 2: Finna PLC vélina í EasySoft</h2>
+                        <p class="content-text">
+                            Nú þegar þú ert á sama neti og PLC vélin þarftu að finna hana í EasySoft.
+                        </p>
+
+                        <div class="step-list">
+                            <div class="step-item">
+                                <div class="step-content">
+                                    <div class="step-title">Veldu Communication flipann</div>
+                                    <p class="step-text">Neðst í EasySoft glugganum eru flipar. Smelltu á <strong>Communication</strong> flipann.</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-content">
+                                    <div class="step-title">Smelltu á "Search for devices"</div>
+                                    <p class="step-text">EasySoft leitar að öllum PLC vélum sem eru á netinu. Þetta getur tekið nokkrar sekúndur.</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-content">
+                                    <div class="step-title">Veldu þína vél</div>
+                                    <p class="step-text">Listi birtist af öllum vélum sem fundust. Veldu vélina sem þú ætlar að vinna með.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="image-placeholder">
+                            <div class="image-placeholder-icon">📷</div>
+                            <p class="image-placeholder-text">Hér kemur skjáskot af Communication flipanum og Search for devices</p>
+                            <span class="image-placeholder-label">communication-search-devices.png</span>
+                        </div>
+
+                        <div class="info-box note">
+                            <span class="info-box-icon">ℹ️</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Finnst vélin ekki?</div>
+                                <p class="info-box-text">
+                                    Athugaðu að þú sért tengd/ur við <strong>IoT-C03</strong> netið. 
+                                    Ef þú ert á öðru neti (t.d. skólanetinu) finnur EasySoft ekki vélina.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Skref 3: Senda forrit á vélina (Download)</h2>
+                        <p class="content-text">
+                            Til að senda forritið þitt yfir á PLC vélina þarftu að nota <strong>Program / Configuration</strong> flipann.
+                        </p>
+
+                        <div class="step-list">
+                            <div class="step-item">
+                                <div class="step-content">
+                                    <div class="step-title">Opnaðu Program / Configuration flipann</div>
+                                    <p class="step-text">Smelltu á <strong>Program / Configuration</strong> flipann í EasySoft.</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-content">
+                                    <div class="step-title">Veldu PC ⇒ Device</div>
+                                    <p class="step-text">Þetta sendir forritið úr tölvunni (PC) yfir á PLC vélina (Device).</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="image-placeholder">
+                            <div class="image-placeholder-icon">📷</div>
+                            <p class="image-placeholder-text">Hér kemur skjáskot af Program / Configuration flipanum og PC ⇒ Device</p>
+                            <span class="image-placeholder-label">program-configuration-pc-device.png</span>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Skref 4: Password Protection gluggi</h2>
+                        <p class="content-text">
+                            Þegar þú sendir forrit kemur gluggi sem spyr um lykilorðsvörn. Við notum það ekki.
+                        </p>
+
+                        <div class="step-list">
+                            <div class="step-item">
+                                <div class="step-content">
+                                    <div class="step-title">Veldu "No" við Password Protect Program</div>
+                                    <p class="step-text">Við viljum ekki setja lykilorð á forritið okkar.</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-content">
+                                    <div class="step-title">Hakaðu í "Don't show this message again"</div>
+                                    <p class="step-text">Þá þarftu ekki að sjá þennan glugga í hvert skipti sem þú sendir forrit.</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-content">
+                                    <div class="step-title">Smelltu á OK</div>
+                                    <p class="step-text">Forritið er nú sent yfir á vélina!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="image-placeholder">
+                            <div class="image-placeholder-icon">📷</div>
+                            <p class="image-placeholder-text">Hér kemur skjáskot af Password Protect glugganum</p>
+                            <span class="image-placeholder-label">password-protect-no.png</span>
+                        </div>
+
+                        <div class="info-box warning">
+                            <span class="info-box-icon">⚠️</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Athugið: Vélin fer í STOP</div>
+                                <p class="info-box-text">
+                                    Þegar þú sendir nýtt forrit á vélina fer hún sjálfkrafa í <strong>STOP</strong> ham. 
+                                    Þú þarft að setja hana aftur í <strong>RUN</strong> til að forritið keyri.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Skref 5: Setja í RUN ham</h2>
+                        <p class="content-text">
+                            Eftir download þarftu að setja PLC vélina í RUN ham til að forritið keyri.
+                        </p>
+
+                        <div style="display: flex; gap: 1rem; margin: 1.5rem 0; flex-wrap: wrap;">
+                            <div style="flex: 1; min-width: 200px; background: var(--border); padding: 1.5rem; border-radius: 12px; text-align: center;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔴</div>
+                                <div style="font-weight: 600; color: var(--error);">STOP</div>
+                                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">Forrit keyrir ekki, útgangar eru OFF</p>
+                            </div>
+                            <div style="flex: 1; min-width: 200px; background: var(--success); padding: 1.5rem; border-radius: 12px; text-align: center; color: var(--bg-dark);">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">🟢</div>
+                                <div style="font-weight: 600;">RUN</div>
+                                <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem;">Forrit keyrir, útgangar virka</p>
+                            </div>
+                        </div>
+
+                        <div class="info-box tip">
+                            <span class="info-box-icon">💡</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Hvernig setja í RUN?</div>
+                                <p class="info-box-text">
+                                    Þú getur breytt á milli RUN og STOP í <strong>Communication</strong> flipanum, 
+                                    eða beint á PLC vélinni ef hún er með skjá eða rofa.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Skref 6: Fara í Online ham</h2>
+                        <p class="content-text">
+                            <strong>Online hamur</strong> gerir þér kleift að sjá hvað er að gerast í forritinu í rauntíma. 
+                            Þetta er mjög gagnlegt til að villuleita og skilja hvernig forritið virkar.
+                        </p>
+
+                        <div class="step-list">
+                            <div class="step-item">
+                                <div class="step-content">
+                                    <div class="step-title">Farðu í Communication flipann</div>
+                                    <p class="step-text">Smelltu á <strong>Communication</strong> flipann neðst í glugganum.</p>
+                                </div>
+                            </div>
+                            <div class="step-item">
+                                <div class="step-content">
+                                    <div class="step-title">Smelltu á Online</div>
+                                    <p class="step-text">EasySoft tengist við vélina og byrjar að sýna rauntíma gögn.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="image-placeholder">
+                            <div class="image-placeholder-icon">📷</div>
+                            <p class="image-placeholder-text">Hér kemur skjáskot af Communication flipanum og Online hnappnum</p>
+                            <span class="image-placeholder-label">communication-online.png</span>
+                        </div>
+
+                        <div class="demo-container">
+                            <div class="demo-title">Hvað sérðu í Online ham?</div>
+                            <div style="padding: 1rem;">
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem;">
+                                    <div style="background: var(--bg-dark); padding: 1rem; border-radius: 8px;">
+                                        <div style="color: var(--success); font-weight: 600; margin-bottom: 0.5rem;">🟢 Virkir tengiliðir</div>
+                                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Tengiliðir sem eru TRUE lýsast upp í grænu</p>
+                                    </div>
+                                    <div style="background: var(--bg-dark); padding: 1rem; border-radius: 8px;">
+                                        <div style="color: var(--primary); font-weight: 600; margin-bottom: 0.5rem;">🔵 Virkar spólur</div>
+                                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Spólur sem eru ON sýna stöðu sína</p>
+                                    </div>
+                                    <div style="background: var(--bg-dark); padding: 1rem; border-radius: 8px;">
+                                        <div style="color: var(--accent); font-weight: 600; margin-bottom: 0.5rem;">🔢 Gildi</div>
+                                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Teljara- og tímagildi uppfærast í rauntíma</p>
+                                    </div>
+                                    <div style="background: var(--bg-dark); padding: 1rem; border-radius: 8px;">
+                                        <div style="color: var(--warning); font-weight: 600; margin-bottom: 0.5rem;">⚡ Rafstraumur</div>
+                                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Þú sérð hvar "rafstraumur" flæðir í LADDER</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="image-placeholder">
+                            <div class="image-placeholder-icon">📷</div>
+                            <p class="image-placeholder-text">Hér kemur skjáskot af Online ham - LADDER með rauntíma gögnum</p>
+                            <span class="image-placeholder-label">online-mode-ladder.png</span>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Samantekt - Skrefin</h2>
+                        
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                                <thead>
+                                    <tr style="background: var(--border);">
+                                        <th style="padding: 1rem; text-align: center; border: 1px solid var(--border-light); width: 60px;">Skref</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Aðgerð</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Hvar</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); text-align: center; font-weight: 600;">1</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Tengja WiFi við <strong>IoT-C03</strong></td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Windows WiFi</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); text-align: center; font-weight: 600;">2</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Search for devices</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Communication flipi</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); text-align: center; font-weight: 600;">3</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">PC ⇒ Device (senda forrit)</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Program / Configuration flipi</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); text-align: center; font-weight: 600;">4</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Password Protect → <strong>No</strong></td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Popup gluggi</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); text-align: center; font-weight: 600;">5</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Setja vélina í RUN</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Communication flipi / vélin</td>
+                                    </tr>
+                                    <tr style="background: rgba(34, 197, 94, 0.1);">
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); text-align: center; font-weight: 600;">6</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Fara í <strong>Online</strong> ham</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Communication flipi</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Algeng vandamál</h2>
+                        
+                        <div class="info-box warning">
+                            <span class="info-box-icon">⚠️</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Finnst engin vél í Search for devices</div>
+                                <p class="info-box-text">
+                                    • Athugaðu að þú sért tengd/ur við <strong>IoT-C03</strong> netið<br>
+                                    • Athugaðu að PLC vélin sé kveikt á<br>
+                                    • Prófaðu að leita aftur
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="info-box warning">
+                            <span class="info-box-icon">⚠️</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">"Program mismatch" við Online</div>
+                                <p class="info-box-text">
+                                    Forritið í EasySoft er ekki það sama og í vélinni. Sendu forritið aftur með 
+                                    <strong>PC ⇒ Device</strong>.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="info-box warning">
+                            <span class="info-box-icon">⚠️</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Útgangar virka ekki eftir Download</div>
+                                <p class="info-box-text">
+                                    Þú gleymdir líklega að setja vélina í <strong>RUN</strong> ham!
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <nav class="lesson-nav">
+                    <a href="1-2-einingar.html" class="nav-btn prev">
+                        <span class="nav-btn-icon">←</span>
+                        <span class="nav-btn-text"><span class="nav-btn-label">Fyrra</span><span class="nav-btn-title">Einingar raðaðar saman</span></span>
+                    </a>
+                    <a href="../kafli2/2-1-set.html" class="nav-btn next" onclick="markLessonComplete('1-3')">
+                        <span class="nav-btn-icon">→</span>
+                        <span class="nav-btn-text"><span class="nav-btn-label">Næsta</span><span class="nav-btn-title">Hvað er SET?</span></span>
+                    </a>
+                </nav>
+            </div>
+        
+            <!-- Footer -->
+            <footer class="site-footer">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <img src="../images/foa-logo.png" alt="FÓA" class="footer-logo">
+                        <div class="footer-info">
+                            <span class="footer-author">Friðrik Óli Atlason</span>
+                            <span class="footer-desc">EasySoft 8 Kennsluvefur</span>
+                        </div>
+                    </div>
+                    <div class="footer-links">
+                        <a href="https://github.com/fridrikoli/easysoft-kennsla" target="_blank" rel="noopener">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="../js/nav-config.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LADDER Builder - Rafdeil VMA</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0066cc; --success: #22c55e; --warning: #eab308; --error: #ef4444; --purple: #a855f7; --cyan: #06b6d4; --bg-dark: #0a0f1a; --bg-card: #111827; --bg-cell: #1a2332; --text-primary: #f8fafc; --text-secondary: #94a3b8; --text-muted: #64748b; --border: #1e293b; --wire: #3b82f6; --wire-active: #22c55e; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; }
+        .header { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 1.1rem; }
+        .header-controls { display: flex; gap: 0.4rem; align-items: center; }
+        .btn { padding: 0.35rem 0.6rem; border: none; border-radius: 5px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--error); color: white; }
+        .btn-secondary { background: var(--border); color: var(--text-primary); }
+        .help-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .help-modal-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; }
+        .help-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); background: var(--bg-cell); }
+        .help-modal-header h2 { font-size: 1rem; }
+        .help-close { background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
+        .help-close:hover { color: var(--text-primary); }
+        .help-modal-body { padding: 1rem; overflow-y: auto; max-height: 60vh; }
+        .help-modal-body h3 { font-size: 0.9rem; margin: 1rem 0 0.5rem 0; color: var(--primary); }
+        .help-modal-body h3:first-child { margin-top: 0; }
+        .help-modal-body ul { margin-left: 1.2rem; }
+        .help-modal-body li { margin-bottom: 0.3rem; font-size: 0.85rem; }
+        .help-modal-body kbd { background: var(--bg-dark); padding: 0.1rem 0.4rem; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+        .help-modal-body p { font-size: 0.85rem; line-height: 1.5; }
+        .main-container { display: flex; height: calc(100vh - 45px); }
+        .toolbox { width: 150px; background: var(--bg-card); border-right: 1px solid var(--border); padding: 0.5rem; overflow-y: auto; display: flex; flex-direction: column; }
+        .toolbox-footer { margin-top: auto; padding: 0.75rem 0.5rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem; }
+        .toolbox-logo { width: 40px; height: 40px; object-fit: contain; opacity: 0.9; flex-shrink: 0; }
+        .toolbox-info { display: flex; flex-direction: column; gap: 0.1rem; }
+        .toolbox-author { font-size: 0.65rem; color: var(--text-secondary); font-weight: 500; }
+        .toolbox-org { font-size: 0.6rem; color: var(--text-muted); }
+        .toolbox h3 { font-size: 0.6rem; color: var(--text-muted); margin-bottom: 0.3rem; text-transform: uppercase; padding: 0.2rem 0.3rem; border-radius: 3px; }
+        .toolbox h3.coils-header { background: rgba(234,179,8,0.15); color: var(--warning); }
+        .tool-section { margin-bottom: 0.5rem; }
+        .tool-item { background: var(--bg-cell); border: 2px solid var(--border); border-radius: 4px; padding: 0.25rem; margin-bottom: 0.2rem; cursor: grab; display: flex; align-items: center; gap: 0.3rem; font-size: 0.65rem; }
+        .tool-item:hover { border-color: var(--primary); }
+        .tool-symbol { font-family: 'JetBrains Mono', monospace; font-weight: 600; min-width: 30px; text-align: center; }
+        .canvas-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .io-panel { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0.4rem 0.6rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+        .io-group { display: flex; gap: 0.2rem; align-items: center; }
+        .io-group-label { font-size: 0.55rem; color: var(--text-muted); margin-right: 0.15rem; }
+        .io-btn { width: 28px; height: 22px; border: 2px solid var(--border); border-radius: 3px; background: var(--bg-cell); color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; cursor: pointer; }
+        .io-btn.input-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+        .io-btn.output-btn { cursor: default; }
+        .io-btn.output-btn.active { background: var(--success); border-color: var(--success); color: white; }
+        .io-btn.marker-btn { border-color: var(--purple); color: var(--purple); cursor: default; }
+        .io-btn.marker-btn.active { background: var(--purple); color: white; }
+        .ladder-container { flex: 1; overflow: auto; padding: 0.5rem; }
+        .ladder-grid { display: flex; flex-direction: column; min-width: 500px; }
+        .network { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.4rem; }
+        .network-header { background: var(--bg-cell); padding: 0.25rem 0.5rem; display: flex; align-items: center; gap: 0.5rem; border-radius: 6px 6px 0 0; }
+        .network-number { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--primary); font-size: 0.75rem; }
+        .network-title { flex: 1; background: transparent; border: none; color: var(--text-primary); font-size: 0.75rem; padding: 0.15rem 0.3rem; }
+        .network-title:focus { outline: none; background: var(--bg-dark); border-radius: 3px; }
+        .network-delete { background: transparent; border: 1px solid var(--error); color: var(--error); padding: 0.15rem 0.35rem; border-radius: 3px; font-size: 0.65rem; cursor: pointer; }
+        .network-body { padding: 0.5rem; }
+        .ladder-canvas { position: relative; min-height: 50px; }
+        .ladder-canvas.has-branch { min-height: 110px; }
+        .ladder-canvas svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .ladder-canvas svg line { stroke: var(--wire); stroke-width: 2; }
+        .ladder-canvas svg line.active { stroke: var(--wire-active); filter: drop-shadow(0 0 3px rgba(34,197,94,0.5)); }
+        .ladder-row { display: flex; align-items: center; height: 46px; position: relative; z-index: 2; }
+        .power-rail { width: 4px; height: 46px; background: var(--wire); border-radius: 2px; }
+        .power-rail.active { background: var(--wire-active); }
+        .ladder-cells { display: flex; flex: 1; height: 100%; align-items: center; }
+        .ladder-cell { width: 80px; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+        .ladder-cell.output-cell { width: 70px; background: rgba(234,179,8,0.08); border-radius: 4px; margin-left: 4px; }
+        .ladder-cell.drop-target { background: rgba(0,102,204,0.15); border-radius: 4px; }
+        .ladder-cell.cursor { background: rgba(0,102,204,0.2); border-radius: 4px; }
+        .ladder-cell.cursor::before { content: '▼'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); color: var(--primary); font-size: 10px; animation: cursorBlink 0.8s ease-in-out infinite; }
+        @keyframes cursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .branch-row { display: flex; align-items: center; height: 46px; position: relative; z-index: 1; margin-left: 4px; margin-top: 6px; }
+        .branch-spacer { flex-shrink: 0; }
+        .branch-cells { display: flex; height: 100%; align-items: center; position: relative; }
+        .branch-cell { width: 80px; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+        .branch-cell.cursor { background: rgba(0,102,204,0.2); border-radius: 4px; }
+        .branch-cell.cursor::before { content: '▼'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); color: var(--primary); font-size: 10px; animation: cursorBlink 0.8s ease-in-out infinite; }
+        .branch-controls { position: absolute; top: 50%; transform: translateY(-50%); display: flex; gap: 1px; z-index: 10; background: var(--bg-card); padding: 2px; border-radius: 3px; border: 1px solid var(--border); }
+        .branch-controls.start-controls { left: -26px; }
+        .branch-controls.end-controls { right: -26px; }
+        .branch-btn { width: 16px; height: 16px; background: var(--primary); border: none; border-radius: 2px; color: white; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .branch-btn.delete { background: var(--error); }
+        .branch-btn:disabled { opacity: 0.3; }
+        .cell-component { background: var(--bg-card); border: 2px solid var(--border); border-radius: 4px; padding: 0.15rem 0.2rem; min-width: 54px; text-align: center; cursor: pointer; z-index: 3; }
+        .cell-component:hover { border-color: var(--primary); }
+        .cell-component.selected { border-color: #ff6b35; box-shadow: 0 0 8px rgba(255,107,53,0.4); }
+        .cell-component.active { background: rgba(34,197,94,0.2); border-color: var(--success); }
+        .cell-component .component-symbol { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600; line-height: 1.1; }
+        .cell-component .component-label { font-size: 0.55rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .cell-component.contact-make .component-symbol { color: var(--success); }
+        .cell-component.contact-break .component-symbol { color: var(--error); }
+        .cell-component.coil-normal .component-symbol { color: var(--warning); }
+        .cell-component.coil-set .component-symbol { color: var(--success); }
+        .cell-component.coil-reset .component-symbol { color: var(--error); }
+        .cell-component.timer-ton .component-symbol, .cell-component.timer-tof .component-symbol { color: var(--cyan); }
+        .cell-component[data-io-type="M"] { border-color: var(--purple); }
+        .cell-component[data-io-type="M"] .component-label { color: var(--purple); }
+        .cell-component[data-io-type="Q"] { border-color: var(--warning); background: rgba(234,179,8,0.1); }
+        .cell-component[data-io-type="T"] { border-color: var(--cyan); background: rgba(6,182,212,0.1); }
+        .timer-display { font-size: 0.5rem; color: var(--cyan); }
+        .help-panel { background: var(--bg-card); border-top: 1px solid var(--border); padding: 0.3rem 0.6rem; font-size: 0.6rem; color: var(--text-secondary); }
+        .help-panel kbd { background: var(--border); padding: 0.05rem 0.15rem; border-radius: 2px; font-size: 0.55rem; }
+        .help-items { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+        .delete-zone { position: fixed; bottom: 45px; right: 320px; width: 45px; height: 45px; background: var(--error); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; opacity: 0; transform: scale(0.5); transition: all 0.3s; pointer-events: none; z-index: 100; }
+        .delete-zone.visible { opacity: 1; transform: scale(1); pointer-events: auto; }
+        .running-indicator { display: none; align-items: center; gap: 0.25rem; padding: 0.25rem 0.5rem; background: var(--success); color: white; border-radius: 4px; animation: pulse 1s infinite; font-size: 0.7rem; }
+        .running-indicator.active { display: flex; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        /* Simulation Sidebar */
+        .sim-sidebar { width: 300px; background: var(--bg-card); border-left: 1px solid var(--border); display: flex; flex-direction: column; }
+        .sim-header { padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 0.3rem; }
+        .sim-tabs { display: flex; border-bottom: 1px solid var(--border); }
+        .sim-tab { flex: 1; padding: 0.3rem; background: transparent; border: none; color: var(--text-muted); font-size: 0.6rem; cursor: pointer; border-bottom: 2px solid transparent; }
+        .sim-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--bg-cell); }
+        .sim-content { flex: 1; overflow-y: auto; }
+        .sim-panel { display: none; padding: 0.5rem; }
+        .sim-panel.active { display: block; }
+        .task-info { background: var(--bg-cell); border-radius: 5px; padding: 0.4rem; margin-bottom: 0.4rem; }
+        .task-info h4 { font-size: 0.65rem; color: #ff6b35; margin-bottom: 0.2rem; }
+        .task-info p { font-size: 0.55rem; color: var(--text-secondary); line-height: 1.3; }
+        .task-io { margin-top: 0.25rem; padding-top: 0.25rem; border-top: 1px solid var(--border); }
+        .task-io-item { font-size: 0.5rem; font-family: 'JetBrains Mono', monospace; padding: 0.08rem 0; display: flex; align-items: center; gap: 0.2rem; }
+        .io-label { min-width: 18px; padding: 0.05rem 0.1rem; border-radius: 2px; text-align: center; font-size: 0.45rem; }
+        .io-label.input { background: var(--primary); color: white; }
+        .io-label.output { background: var(--success); color: white; }
+        .sim-canvas { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); border-radius: 6px; position: relative; height: 200px; overflow: hidden; border: 1px solid var(--border); }
+        .conveyor { position: absolute; bottom: 30px; left: 15px; right: 15px; height: 20px; background: #2d2d2d; border-radius: 3px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+        .conveyor-belt { position: absolute; top: 0; left: 0; width: 200%; height: 100%; background: repeating-linear-gradient(90deg, #3d3d3d 0px, #3d3d3d 15px, #4a4a4a 15px, #4a4a4a 30px); }
+        .conveyor-belt.running { animation: beltMove 0.5s linear infinite; }
+        .conveyor-belt.reverse { animation: beltMoveReverse 0.5s linear infinite; }
+        @keyframes beltMove { from { transform: translateX(-30px); } to { transform: translateX(0); } }
+        @keyframes beltMoveReverse { from { transform: translateX(0); } to { transform: translateX(-30px); } }
+        .conveyor-leg { position: absolute; bottom: -15px; width: 8px; height: 15px; background: #555; }
+        .conveyor-leg.left { left: 10px; }
+        .conveyor-leg.right { right: 10px; }
+        .box { position: absolute; bottom: 52px; width: 30px; height: 30px; background: linear-gradient(135deg, #d4a017 0%, #aa8414 100%); border: 2px solid #c9a227; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; box-shadow: 2px 2px 4px rgba(0,0,0,0.3); transition: left 0.05s linear; }
+        .sensor { position: absolute; bottom: 55px; display: flex; flex-direction: column; align-items: center; }
+        .sensor-post { width: 6px; height: 40px; background: linear-gradient(180deg, #666 0%, #444 100%); border-radius: 2px; }
+        .sensor-head { width: 12px; height: 12px; background: #333; border-radius: 50%; border: 2px solid #555; margin-bottom: 2px; transition: all 0.1s; }
+        .sensor-head.active { background: var(--error); border-color: var(--error); box-shadow: 0 0 10px var(--error); }
+        .sensor-beam { position: absolute; top: 14px; width: 2px; height: 32px; background: rgba(255,0,0,0.2); }
+        .sensor-beam.active { background: rgba(255,0,0,0.8); box-shadow: 0 0 5px red; }
+        .sensor-label { font-size: 0.5rem; color: var(--text-muted); margin-top: 2px; }
+        .status-panel { position: absolute; top: 8px; left: 8px; display: flex; gap: 0.3rem; }
+        .status-item { padding: 0.15rem 0.3rem; background: var(--bg-cell); border-radius: 3px; font-size: 0.5rem; font-family: 'JetBrains Mono', monospace; border: 1px solid var(--border); }
+        .status-item.active { background: var(--success); border-color: var(--success); }
+        .status-item.reverse { background: var(--warning); border-color: var(--warning); color: #000; }
+        .lights-panel { position: absolute; top: 8px; right: 8px; display: flex; gap: 0.25rem; }
+        .light { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #333; }
+        .light.green { background: #1a3a1a; }
+        .light.green.active { background: var(--success); box-shadow: 0 0 12px var(--success); }
+        .light.red { background: #3a1a1a; }
+        .light.red.active { background: var(--error); box-shadow: 0 0 12px var(--error); }
+        .sim-controls { padding: 0.4rem; border-top: 1px solid var(--border); display: flex; gap: 0.25rem; }
+        .sim-btn { padding: 0.25rem 0.4rem; font-size: 0.6rem; border-radius: 3px; cursor: pointer; border: 1px solid var(--border); background: var(--bg-cell); color: var(--text-primary); }
+        .sim-btn:hover { border-color: var(--primary); }
+        .flag-icon { width: 20px; height: 14px; border-radius: 2px; vertical-align: middle; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>⚡ LADDER Builder</h1>
+        <div class="header-controls">
+            <div class="running-indicator" id="running-indicator">🔄 Keyrir</div>
+            <button class="btn btn-success" onclick="toggleSimulation()" id="run-btn">▶️ Keyra</button>
+            <button class="btn btn-secondary" onclick="clearAll()">🗑️</button>
+            <button class="btn btn-secondary" onclick="addNetwork()">➕</button>
+            <button class="btn btn-secondary" onclick="toggleHelp()" title="Hjálp">❓</button>
+            <button class="btn btn-secondary" onclick="toggleLanguage()" id="lang-btn">
+                <svg id="flag-icon" class="flag-icon" viewBox="0 0 20 14"></svg>
+                <span id="lang-text">EN</span>
+            </button>
+        </div>
+    </header>
+    <!-- Help Modal -->
+    <div class="help-modal" id="help-modal" style="display:none;">
+        <div class="help-modal-content">
+            <div class="help-modal-header">
+                <h2 id="help-title">📖 Leiðbeiningar</h2>
+                <button class="help-close" onclick="toggleHelp()">✕</button>
+            </div>
+            <div class="help-modal-body" id="help-body">
+                <h3>Flýtileiðir</h3>
+                <ul>
+                    <li><kbd>i1</kbd>-<kbd>i8</kbd> - Bæta við input snertum</li>
+                    <li><kbd>M1</kbd>-<kbd>M16</kbd> - Bæta við marker (snerta eða spóla)</li>
+                    <li><kbd>Q1</kbd>-<kbd>Q4</kbd> - Bæta við output spólu</li>
+                    <li><kbd>T1</kbd>-<kbd>T4</kbd> - Bæta við tíma</li>
+                    <li><kbd>N</kbd> - Nýtt network</li>
+                    <li><kbd>←→↑↓</kbd> - Færa cursor</li>
+                    <li><kbd>Space</kbd> - Skipta um tegund (NO↔NC, Coil↔SET↔RST)</li>
+                    <li><kbd>+</kbd> - Bæta við parallel branch</li>
+                    <li><kbd>Delete</kbd> - Eyða íhlut</li>
+                </ul>
+                <h3>Drag & Drop</h3>
+                <p>Dragðu íhluti úr vinstri valmynd inn á LADDER.</p>
+                <h3>Hermir</h3>
+                <p>Notaðu herminn hægra megin til að prófa LADDER rökfræðina. Smelltu á ▶️ Keyra til að byrja.</p>
+            </div>
+        </div>
+    </div>
+    <div class="main-container">
+        <aside class="toolbox">
+            <div class="tool-section" id="section-contacts">
+                <h3 id="header-contacts">Snertur</h3>
+                <div class="tool-item" draggable="true" data-type="contact-make"><span class="tool-symbol" style="color:var(--success)">] [</span><span>NO</span></div>
+                <div class="tool-item" draggable="true" data-type="contact-break"><span class="tool-symbol" style="color:var(--error)">]/[</span><span>NC</span></div>
+            </div>
+            <div class="tool-section" id="section-coils">
+                <h3 class="coils-header" id="header-coils">Spólur</h3>
+                <div class="tool-item" draggable="true" data-type="coil-normal"><span class="tool-symbol" style="color:var(--warning)">( )</span><span>Coil</span></div>
+                <div class="tool-item" draggable="true" data-type="coil-set"><span class="tool-symbol" style="color:var(--success)">(S)</span><span>SET</span></div>
+                <div class="tool-item" draggable="true" data-type="coil-reset"><span class="tool-symbol" style="color:var(--error)">(R)</span><span>RST</span></div>
+            </div>
+            <div class="tool-section" id="section-timers">
+                <h3 id="header-timers">Tímaliðar</h3>
+                <div class="tool-item" draggable="true" data-type="timer-ton"><span class="tool-symbol" style="color:var(--cyan)">TON</span></div>
+                <div class="tool-item" draggable="true" data-type="timer-tof"><span class="tool-symbol" style="color:var(--cyan)">TOF</span></div>
+            </div>
+            <div class="toolbox-footer">
+                <img src="images/foa-logo.png" alt="Logo" class="toolbox-logo" onerror="this.style.display='none'">
+                <div class="toolbox-info">
+                    <span class="toolbox-author">Friðrik Óli Atlason</span>
+                    <span class="toolbox-org">Rafdeild VMA</span>
+                </div>
+            </div>
+        </aside>
+        <div class="canvas-area">
+            <div class="io-panel">
+                <div class="io-group"><span class="io-group-label">In:</span>
+                    <button class="io-btn input-btn" data-input="i1" onclick="toggleInput(this)">i1</button>
+                    <button class="io-btn input-btn" data-input="i2" onclick="toggleInput(this)">i2</button>
+                    <button class="io-btn input-btn" data-input="i3" onclick="toggleInput(this)">i3</button>
+                    <button class="io-btn input-btn" data-input="i4" onclick="toggleInput(this)">i4</button>
+                    <button class="io-btn input-btn" data-input="i5" onclick="toggleInput(this)">i5</button>
+                    <button class="io-btn input-btn" data-input="i6" onclick="toggleInput(this)">i6</button>
+                    <button class="io-btn input-btn" data-input="i7" onclick="toggleInput(this)">i7</button>
+                    <button class="io-btn input-btn" data-input="i8" onclick="toggleInput(this)">i8</button>
+                </div>
+                <div class="io-group"><span class="io-group-label">M:</span>
+                    <button class="io-btn marker-btn" id="marker-M1">M1</button>
+                    <button class="io-btn marker-btn" id="marker-M2">M2</button>
+                    <button class="io-btn marker-btn" id="marker-M3">M3</button>
+                    <button class="io-btn marker-btn" id="marker-M4">M4</button>
+                    <button class="io-btn marker-btn" id="marker-M5">M5</button>
+                    <button class="io-btn marker-btn" id="marker-M6">M6</button>
+                    <button class="io-btn marker-btn" id="marker-M7">M7</button>
+                    <button class="io-btn marker-btn" id="marker-M8">M8</button>
+                    <button class="io-btn marker-btn" id="marker-M9">M9</button>
+                    <button class="io-btn marker-btn" id="marker-M10">10</button>
+                    <button class="io-btn marker-btn" id="marker-M11">11</button>
+                    <button class="io-btn marker-btn" id="marker-M12">12</button>
+                    <button class="io-btn marker-btn" id="marker-M13">13</button>
+                    <button class="io-btn marker-btn" id="marker-M14">14</button>
+                    <button class="io-btn marker-btn" id="marker-M15">15</button>
+                    <button class="io-btn marker-btn" id="marker-M16">16</button>
+                </div>
+                <div class="io-group"><span class="io-group-label">Q:</span>
+                    <button class="io-btn output-btn" id="output-Q1">Q1</button>
+                    <button class="io-btn output-btn" id="output-Q2">Q2</button>
+                    <button class="io-btn output-btn" id="output-Q3">Q3</button>
+                    <button class="io-btn output-btn" id="output-Q4">Q4</button>
+                </div>
+            </div>
+            <div class="ladder-container"><div class="ladder-grid" id="ladder-grid"></div></div>
+            <div class="help-panel">
+                <div class="help-items">
+                    <span><kbd>i1</kbd><kbd>M2</kbd><kbd>Q1</kbd> Ný snerta/spóla</span>
+                    <span><kbd>N</kbd> Network</span>
+                    <span><kbd>←→↑↓</kbd> Færa</span>
+                    <span><kbd>Space</kbd> Tegund</span>
+                    <span><kbd>+</kbd> Parallel</span>
+                </div>
+            </div>
+        </div>
+        <aside class="sim-sidebar">
+            <div class="sim-header">🏭 Hermir</div>
+            <div class="sim-tabs">
+                <button class="sim-tab active" onclick="showSimTab('conveyor')">Færiband</button>
+                <button class="sim-tab" onclick="showSimTab('traffic')">Ljós</button>
+            </div>
+            <div class="sim-content">
+                <div class="sim-panel active" id="sim-conveyor">
+                    <div class="task-info">
+                        <h4>📋 Verkefni: Færiband</h4>
+                        <p>Forritaðu LADDER til að stjórna færibandinu. Skynjarar verða sjálfkrafa háir þegar kassi fer framhjá.</p>
+                        <div class="task-io">
+                            <div class="task-io-item"><span class="io-label input">i1</span> Start</div>
+                            <div class="task-io-item"><span class="io-label input">i2</span> Stop</div>
+                            <div class="task-io-item"><span class="io-label input">i3</span> Skynjari S1 (auto)</div>
+                            <div class="task-io-item"><span class="io-label input">i4</span> Skynjari S2 (auto)</div>
+                            <div class="task-io-item"><span class="io-label input">i5</span> Skynjari S3 (auto)</div>
+                            <div class="task-io-item"><span class="io-label output">Q1</span> Mótor áfram</div>
+                            <div class="task-io-item"><span class="io-label output">Q2</span> Mótor aftur</div>
+                            <div class="task-io-item"><span class="io-label output">Q3</span> Grænt ljós</div>
+                            <div class="task-io-item"><span class="io-label output">Q4</span> Rautt ljós</div>
+                        </div>
+                    </div>
+                    <div class="sim-canvas" id="conveyor-canvas">
+                        <div class="status-panel">
+                            <div class="status-item" id="motor-fwd">▶ Áfram</div>
+                            <div class="status-item" id="motor-rev">◀ Aftur</div>
+                        </div>
+                        <div class="lights-panel">
+                            <div class="light green" id="light-green"></div>
+                            <div class="light red" id="light-red"></div>
+                        </div>
+                        <div class="conveyor">
+                            <div class="conveyor-belt" id="conveyor-belt"></div>
+                            <div class="conveyor-leg left"></div>
+                            <div class="conveyor-leg right"></div>
+                        </div>
+                        <div class="sensor" style="left:35px;" id="sensor1">
+                            <div class="sensor-head" id="sensor1-head"></div>
+                            <div class="sensor-post"></div>
+                            <div class="sensor-beam" id="sensor1-beam"></div>
+                            <div class="sensor-label">S1</div>
+                        </div>
+                        <div class="sensor" style="left:120px;" id="sensor2">
+                            <div class="sensor-head" id="sensor2-head"></div>
+                            <div class="sensor-post"></div>
+                            <div class="sensor-beam" id="sensor2-beam"></div>
+                            <div class="sensor-label">S2</div>
+                        </div>
+                        <div class="sensor" style="left:205px;" id="sensor3">
+                            <div class="sensor-head" id="sensor3-head"></div>
+                            <div class="sensor-post"></div>
+                            <div class="sensor-beam" id="sensor3-beam"></div>
+                            <div class="sensor-label">S3</div>
+                        </div>
+                    </div>
+                    <div class="sim-controls">
+                        <button class="sim-btn" onclick="spawnBox()">📦 Kassi</button>
+                        <button class="sim-btn" onclick="resetConveyor()">🔄 Reset</button>
+                    </div>
+                </div>
+                <div class="sim-panel" id="sim-traffic">
+                    <div class="task-info">
+                        <h4>📋 Verkefni: Umferðarljós</h4>
+                        <p>Forritaðu umferðarljós með tímastýringu.</p>
+                        <div class="task-io">
+                            <div class="task-io-item"><span class="io-label input">i1</span> Start</div>
+                            <div class="task-io-item"><span class="io-label output">Q1</span> Rautt</div>
+                            <div class="task-io-item"><span class="io-label output">Q2</span> Gult</div>
+                            <div class="task-io-item"><span class="io-label output">Q3</span> Grænt</div>
+                        </div>
+                    </div>
+                    <div class="sim-canvas" style="display:flex;align-items:center;justify-content:center;">
+                        <div style="background:#222;padding:12px;border-radius:8px;border:3px solid #444;">
+                            <div id="tl-red" style="width:40px;height:40px;border-radius:50%;background:#3a1a1a;margin-bottom:8px;border:2px solid #333;"></div>
+                            <div id="tl-yellow" style="width:40px;height:40px;border-radius:50%;background:#3a3a1a;margin-bottom:8px;border:2px solid #333;"></div>
+                            <div id="tl-green" style="width:40px;height:40px;border-radius:50%;background:#1a3a1a;border:2px solid #333;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <div class="delete-zone" id="delete-zone">🗑️</div>
+<script>
+let networks = [], selectedComponent = null, selectedInfo = null, isRunning = false, simulationInterval = null;
+let cursorInfo = null; // {network, cell, row} - sýnir hvar keyboard cursor er
+const inputState = {i1:false,i2:false,i3:false,i4:false,i5:false,i6:false,i7:false,i8:false};
+const outputState = {Q1:false,Q2:false,Q3:false,Q4:false};
+const markerState = {};
+for(let i=1;i<=16;i++)markerState['M'+i]=false;
+const timerState = {T1:{elapsed:0,output:false,preset:2000},T2:{elapsed:0,output:false,preset:2000},T3:{elapsed:0,output:false,preset:2000},T4:{elapsed:0,output:false,preset:2000}};
+const latchedOutputs = {Q1:false,Q2:false,Q3:false,Q4:false};
+const latchedMarkers = {};
+for(let i=1;i<=16;i++)latchedMarkers['M'+i]=false;
+const CELL_W = 80;
+let boxes = [], boxIdCounter = 0, activeSimTab = 'conveyor';
+let currentLang = 'is';
+
+const translations = {
+    is: {
+        title: '⚡ LADDER Builder',
+        run: '▶️ Keyra',
+        stop: '⏹️ Stop',
+        running: '🔄 Keyrir',
+        helpTitle: '📖 Leiðbeiningar',
+        shortcuts: 'Flýtileiðir',
+        shortcutsList: [
+            '<kbd>i1</kbd>-<kbd>i8</kbd> - Bæta við input snertum',
+            '<kbd>M1</kbd>-<kbd>M16</kbd> - Bæta við marker (snerta eða spóla)',
+            '<kbd>Q1</kbd>-<kbd>Q4</kbd> - Bæta við output spólu',
+            '<kbd>T1</kbd>-<kbd>T4</kbd> - Bæta við tíma',
+            '<kbd>N</kbd> - Nýtt network',
+            '<kbd>←→↑↓</kbd> - Færa cursor',
+            '<kbd>Space</kbd> - Skipta um tegund (NO↔NC, Coil↔SET↔RST)',
+            '<kbd>+</kbd> - Bæta við parallel branch',
+            '<kbd>Delete</kbd> - Eyða íhlut'
+        ],
+        dragDrop: 'Drag & Drop',
+        dragDropDesc: 'Dragðu íhluti úr vinstri valmynd inn á LADDER.',
+        simulator: 'Hermir',
+        simulatorDesc: 'Notaðu herminn hægra megin til að prófa LADDER rökfræðina. Smelltu á ▶️ Keyra til að byrja.',
+        contacts: 'Snertur',
+        coils: 'Spólur',
+        timers: 'Tímaliðar',
+        langBtn: '🇬🇧 EN'
+    },
+    en: {
+        title: '⚡ LADDER Builder',
+        run: '▶️ Run',
+        stop: '⏹️ Stop',
+        running: '🔄 Running',
+        helpTitle: '📖 Instructions',
+        shortcuts: 'Shortcuts',
+        shortcutsList: [
+            '<kbd>i1</kbd>-<kbd>i8</kbd> - Add input contacts',
+            '<kbd>M1</kbd>-<kbd>M16</kbd> - Add marker (contact or coil)',
+            '<kbd>Q1</kbd>-<kbd>Q4</kbd> - Add output coil',
+            '<kbd>T1</kbd>-<kbd>T4</kbd> - Add timer',
+            '<kbd>N</kbd> - New network',
+            '<kbd>←→↑↓</kbd> - Move cursor',
+            '<kbd>Space</kbd> - Toggle type (NO↔NC, Coil↔SET↔RST)',
+            '<kbd>+</kbd> - Add parallel branch',
+            '<kbd>Delete</kbd> - Delete component'
+        ],
+        dragDrop: 'Drag & Drop',
+        dragDropDesc: 'Drag components from the left panel onto the LADDER.',
+        simulator: 'Simulator',
+        simulatorDesc: 'Use the simulator on the right to test your LADDER logic. Click ▶️ Run to start.',
+        contacts: 'Contacts',
+        coils: 'Coils',
+        timers: 'Timers',
+        langBtn: '🇮🇸 IS'
+    }
+};
+
+function toggleHelp() {
+    const modal = document.getElementById('help-modal');
+    modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+}
+
+function toggleLanguage() {
+    currentLang = currentLang === 'is' ? 'en' : 'is';
+    applyLanguage();
+}
+
+function drawFlag(lang) {
+    const svg = document.getElementById('flag-icon');
+    if (lang === 'is') {
+        // Enska fáninn (skipta YFÍ á ensku)
+        svg.innerHTML = `
+            <rect width="20" height="14" fill="#012169"/>
+            <path d="M0,0 L20,14 M20,0 L0,14" stroke="#fff" stroke-width="2.5"/>
+            <path d="M0,0 L20,14 M20,0 L0,14" stroke="#C8102E" stroke-width="1.5"/>
+            <path d="M10,0 V14 M0,7 H20" stroke="#fff" stroke-width="4"/>
+            <path d="M10,0 V14 M0,7 H20" stroke="#C8102E" stroke-width="2.5"/>
+        `;
+    } else {
+        // Íslenski fáninn (skipta YFÍ á íslensku)
+        svg.innerHTML = `
+            <rect width="20" height="14" fill="#003897"/>
+            <rect x="6" y="0" width="4" height="14" fill="#fff"/>
+            <rect x="0" y="5" width="20" height="4" fill="#fff"/>
+            <rect x="7" y="0" width="2" height="14" fill="#D72828"/>
+            <rect x="0" y="6" width="20" height="2" fill="#D72828"/>
+        `;
+    }
+}
+
+function applyLanguage() {
+    const t = translations[currentLang];
+    // Sýna fána fyrir NÆSTA tungumál (það sem verður ef smellt)
+    drawFlag(currentLang);
+    document.getElementById('lang-text').textContent = currentLang === 'is' ? 'EN' : 'IS';
+    document.getElementById('help-title').textContent = t.helpTitle;
+    
+    // Update help body
+    const helpBody = document.getElementById('help-body');
+    helpBody.innerHTML = `
+        <h3>${t.shortcuts}</h3>
+        <ul>${t.shortcutsList.map(s => '<li>' + s + '</li>').join('')}</ul>
+        <h3>${t.dragDrop}</h3>
+        <p>${t.dragDropDesc}</p>
+        <h3>${t.simulator}</h3>
+        <p>${t.simulatorDesc}</p>
+    `;
+    
+    // Update toolbox headers
+    document.getElementById('header-contacts').textContent = t.contacts;
+    document.getElementById('header-coils').textContent = t.coils;
+    document.getElementById('header-timers').textContent = t.timers;
+    
+    // Update run button if not running
+    if (!isRunning) {
+        document.getElementById('run-btn').innerHTML = t.run;
+    }
+    document.getElementById('running-indicator').textContent = t.running;
+}
+
+function init() { addNetwork(); setupDragAndDrop(); setupKeyboardShortcuts(); cursorInfo={network:0,cell:0,row:'main'}; renderLadder(); applyLanguage(); }
+function showSimTab(tab) {
+    activeSimTab = tab;
+    document.querySelectorAll('.sim-tab').forEach((t,i) => t.classList.toggle('active', (tab==='conveyor'&&i===0)||(tab==='traffic'&&i===1)));
+    document.querySelectorAll('.sim-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('sim-'+tab).classList.add('active');
+}
+function addNetwork() { networks.push({title:'',mainCells:[null,null,null,null,null],branch:null}); renderLadder(); }
+function deleteNetwork(ni) { if(networks.length===1)return; networks.splice(ni,1); renderLadder(); }
+function renderLadder() {
+    const grid = document.getElementById('ladder-grid');
+    grid.innerHTML = '';
+    networks.forEach((net,ni) => {
+        const netEl = document.createElement('div');
+        netEl.className = 'network';
+        netEl.innerHTML = `<div class="network-header"><span class="network-number">N${ni+1}</span><input type="text" class="network-title" placeholder="Lýsing..." value="${net.title||''}" onchange="networks[${ni}].title=this.value"><button class="network-delete" onclick="deleteNetwork(${ni})" ${networks.length===1?'disabled style="opacity:0.3"':''}>✕</button></div>`;
+        const body = document.createElement('div');
+        body.className = 'network-body';
+        const canvas = document.createElement('div');
+        canvas.className = 'ladder-canvas' + (net.branch?' has-branch':'');
+        const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        svg.id = `svg-${ni}`;
+        canvas.appendChild(svg);
+        const mainRow = document.createElement('div');
+        mainRow.className = 'ladder-row';
+        mainRow.innerHTML = `<div class="power-rail" id="rail-left-${ni}"></div>`;
+        const mainCells = document.createElement('div');
+        mainCells.className = 'ladder-cells';
+        for(let ci=0;ci<5;ci++){
+            const cell = document.createElement('div');
+            const isCursor = cursorInfo && cursorInfo.network===ni && cursorInfo.cell===ci && cursorInfo.row==='main';
+            cell.className = 'ladder-cell'+(ci===4?' output-cell':'')+(isCursor?' cursor':'');
+            cell.dataset.network=ni; cell.dataset.cell=ci; cell.dataset.row='main';
+            if(net.mainCells[ci]) cell.appendChild(createComponent(net.mainCells[ci],ni,ci,'main'));
+            mainCells.appendChild(cell);
+        }
+        mainRow.appendChild(mainCells);
+        mainRow.innerHTML += `<div class="power-rail" id="rail-right-${ni}"></div>`;
+        canvas.appendChild(mainRow);
+        if(net.branch){
+            const branchRow = document.createElement('div');
+            branchRow.className = 'branch-row';
+            const spacer = document.createElement('div');
+            spacer.className = 'branch-spacer';
+            spacer.style.width = ((net.branch.afterCell+1)*CELL_W)+'px';
+            branchRow.appendChild(spacer);
+            const branchCells = document.createElement('div');
+            branchCells.className = 'branch-cells';
+            branchCells.style.position = 'relative';
+            branchCells.innerHTML = `<div class="branch-controls start-controls"><button class="branch-btn" onclick="moveBranchStart(${ni},-1)" ${net.branch.afterCell<0?'disabled':''}>◀</button><button class="branch-btn" onclick="moveBranchStart(${ni},1)" ${net.branch.afterCell>=net.branch.returnAfterCell-1?'disabled':''}>▶</button></div>`;
+            const numBranchCells = net.branch.returnAfterCell - net.branch.afterCell;
+            for(let i=0;i<numBranchCells;i++){
+                const bci = net.branch.afterCell+1+i;
+                const cell = document.createElement('div');
+                const isCursor = cursorInfo && cursorInfo.network===ni && cursorInfo.cell===bci && cursorInfo.row==='branch';
+                cell.className = 'branch-cell'+(isCursor?' cursor':'');
+                cell.dataset.network=ni; cell.dataset.cell=bci; cell.dataset.row='branch';
+                if(net.branch.cells&&net.branch.cells[bci]) cell.appendChild(createComponent(net.branch.cells[bci],ni,bci,'branch'));
+                branchCells.appendChild(cell);
+            }
+            branchCells.innerHTML += `<div class="branch-controls end-controls"><button class="branch-btn" onclick="moveBranchEnd(${ni},-1)" ${net.branch.returnAfterCell<=net.branch.afterCell+1?'disabled':''}>◀</button><button class="branch-btn" onclick="moveBranchEnd(${ni},1)" ${net.branch.returnAfterCell>=3?'disabled':''}>▶</button><button class="branch-btn delete" onclick="deleteBranch(${ni})">✕</button></div>`;
+            branchRow.appendChild(branchCells);
+            canvas.appendChild(branchRow);
+        }
+        body.appendChild(canvas);
+        netEl.appendChild(body);
+        grid.appendChild(netEl);
+        drawWires(ni);
+    });
+    setupDropZones();
+    makeDraggable();
+}
+function drawWires(ni){
+    const svg=document.getElementById(`svg-${ni}`); if(!svg)return; svg.innerHTML='';
+    const net=networks[ni], y1=23, y2=75, railW=4;
+    for(let ci=0;ci<=4;ci++){
+        const x1=railW+ci*CELL_W, x2=ci===4?railW+ci*CELL_W+28:railW+(ci+1)*CELL_W;
+        const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+        line.setAttribute('x1',x1);line.setAttribute('y1',y1);line.setAttribute('x2',x2);line.setAttribute('y2',y1);
+        line.id=`wire-main-${ni}-${ci}`; svg.appendChild(line);
+    }
+    if(net.branch){
+        const downX=railW+(net.branch.afterCell+1)*CELL_W, upX=railW+(net.branch.returnAfterCell+1)*CELL_W;
+        [['down',downX,y1,downX,y2],['branch',downX,y2,upX,y2],['up',upX,y2,upX,y1]].forEach(([id,x1,y1,x2,y2])=>{
+            const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+            l.setAttribute('x1',x1);l.setAttribute('y1',y1);l.setAttribute('x2',x2);l.setAttribute('y2',y2);
+            l.id=`wire-${id}-${ni}`; svg.appendChild(l);
+        });
+    }
+}
+function createComponent(comp,ni,ci,row){
+    const el=document.createElement('div');
+    el.className=`cell-component ${comp.type}`;
+    el.dataset.componentType=comp.type; el.dataset.io=comp.io||''; el.dataset.ioType=comp.io?(comp.io[0]==='i'?'i':comp.io[0]):'';
+    el.dataset.network=ni; el.dataset.cell=ci; el.dataset.row=row;
+    const symbols={'contact-make':'] [','contact-break':']/[','coil-normal':'( )','coil-set':'(S)','coil-reset':'(R)','timer-ton':'TON','timer-tof':'TOF'};
+    let extra='';
+    if(comp.type.startsWith('timer')&&comp.io&&timerState[comp.io]){const ts=timerState[comp.io];extra=`<div class="timer-display">${(ts.elapsed/1000).toFixed(1)}/${(ts.preset/1000).toFixed(1)}s</div>`;}
+    el.innerHTML=`<div class="component-symbol">${symbols[comp.type]||''}</div><div class="component-label">${comp.io||'???'}</div>${extra}`;
+    el.onclick=(e)=>{e.stopPropagation();selectComponent(el,ni,ci,row);};
+    return el;
+}
+function addBranch(ni,afterCell){if(networks[ni].branch)return;networks[ni].branch={afterCell,returnAfterCell:Math.min(afterCell+1,3),cells:[null,null,null,null]};renderLadder();}
+function deleteBranch(ni){networks[ni].branch=null;renderLadder();}
+function moveBranchStart(ni,dir){const b=networks[ni].branch;if(b&&b.afterCell+dir>=-1&&b.afterCell+dir<b.returnAfterCell){b.afterCell+=dir;renderLadder();}}
+function moveBranchEnd(ni,dir){const b=networks[ni].branch;if(b&&b.returnAfterCell+dir>b.afterCell&&b.returnAfterCell+dir<=3){b.returnAfterCell+=dir;renderLadder();}}
+let draggedType=null,draggedFrom=null;
+function setupDragAndDrop(){document.querySelectorAll('.tool-item').forEach(item=>{item.addEventListener('dragstart',dragStart);item.addEventListener('dragend',dragEnd);});}
+function makeDraggable(){document.querySelectorAll('.cell-component').forEach(c=>{c.draggable=true;c.addEventListener('dragstart',dragStart);c.addEventListener('dragend',dragEnd);});}
+function setupDropZones(){
+    document.querySelectorAll('.ladder-cell,.branch-cell').forEach(cell=>{cell.addEventListener('dragover',dragOver);cell.addEventListener('dragleave',dragLeave);cell.addEventListener('drop',drop);});
+    const dz=document.getElementById('delete-zone');
+    dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
+    dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+    dz.addEventListener('drop',deleteDrop);
+}
+function dragStart(e){draggedType=e.target.dataset.type||e.target.closest('.cell-component')?.dataset.componentType;const comp=e.target.closest('.cell-component');if(comp)draggedFrom={network:+comp.dataset.network,cell:+comp.dataset.cell,row:comp.dataset.row};e.target.classList.add('dragging');document.getElementById('delete-zone').classList.add('visible');}
+function dragEnd(e){e.target.classList.remove('dragging');document.getElementById('delete-zone').classList.remove('visible');document.querySelectorAll('.ladder-cell,.branch-cell').forEach(c=>c.classList.remove('drop-target'));draggedFrom=null;}
+function dragOver(e){e.preventDefault();const cell=e.target.closest('.ladder-cell,.branch-cell');if(!cell)return;const isOut=cell.classList.contains('output-cell'),isCoil=draggedType?.startsWith('coil'),isTimer=draggedType?.startsWith('timer');if((isOut&&(isCoil||isTimer))||(!isOut&&!isCoil&&!isTimer))cell.classList.add('drop-target');}
+function dragLeave(e){e.target.closest('.ladder-cell,.branch-cell')?.classList.remove('drop-target');}
+function drop(e){
+    e.preventDefault();const cell=e.target.closest('.ladder-cell,.branch-cell');if(!cell)return;cell.classList.remove('drop-target');
+    const ni=+cell.dataset.network,ci=+cell.dataset.cell,row=cell.dataset.row,isOut=cell.classList.contains('output-cell'),isCoil=draggedType?.startsWith('coil'),isTimer=draggedType?.startsWith('timer');
+    if((isOut&&!isCoil&&!isTimer)||(!isOut&&(isCoil||isTimer)))return;
+    if(draggedFrom){const net=networks[draggedFrom.network];if(draggedFrom.row==='branch'&&net.branch)net.branch.cells[draggedFrom.cell]=null;else net.mainCells[draggedFrom.cell]=null;}
+    let defaultIO=isCoil?'Q1':isTimer?'T1':'i1';
+    const net=networks[ni];
+    if(row==='branch'&&net.branch){if(!net.branch.cells)net.branch.cells=[null,null,null,null];net.branch.cells[ci]={type:draggedType,io:defaultIO};}
+    else net.mainCells[ci]={type:draggedType,io:defaultIO};
+    renderLadder();
+    setTimeout(()=>{const nc=document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="${row}"].cell-component`);if(nc)selectComponent(nc,ni,ci,row);},50);
+}
+function deleteDrop(e){e.preventDefault();document.getElementById('delete-zone').classList.remove('drag-over');if(draggedFrom){const net=networks[draggedFrom.network];if(draggedFrom.row==='branch'&&net.branch)net.branch.cells[draggedFrom.cell]=null;else net.mainCells[draggedFrom.cell]=null;renderLadder();}}
+function selectComponent(el,ni,ci,row){document.querySelectorAll('.cell-component').forEach(c=>c.classList.remove('selected'));selectedComponent=el;selectedInfo={network:ni,cell:ci,row};el.classList.add('selected');}
+function navigateToCell(ni,ci,row){
+    cursorInfo = {network:ni, cell:ci, row:row};
+    const comp=document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="${row}"].cell-component`);
+    if(comp){selectComponent(comp,ni,ci,row);return true;}
+    selectedComponent=null;selectedInfo=null;
+    renderLadder();
+    return false;
+}
+function moveCursor(ni,ci,row){
+    cursorInfo = {network:ni, cell:ci, row:row};
+    const comp=document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="${row}"].cell-component`);
+    if(comp){selectComponent(comp,ni,ci,row);}
+    else{selectedComponent=null;selectedInfo=null;}
+    renderLadder();
+}
+// Quick-type buffer
+let typeBuffer='';
+let typeTimeout=null;
+function clearTypeBuffer(){typeBuffer='';typeTimeout=null;}
+function processTypeBuffer(){
+    if(!typeBuffer)return;
+    const match=typeBuffer.match(/^([iIMQT])(\d{1,2})$/i);
+    if(match){
+        const ioType=match[1].toUpperCase()==='I'?'i':match[1].toUpperCase();
+        const num=parseInt(match[2]);
+        let type,max;
+        if(ioType==='i'){type='contact-make';max=8;}
+        else if(ioType==='M'){type='contact-make';max=16;}
+        else if(ioType==='Q'){type='coil-normal';max=4;}
+        else if(ioType==='T'){type='timer-ton';max=4;}
+        if(num>=1&&num<=max){
+            const io=ioType+num;
+            // Nota cursor stað ef til, annars síðasta network
+            let ni = cursorInfo ? cursorInfo.network : networks.length-1;
+            let targetCell = cursorInfo ? cursorInfo.cell : null;
+            let targetRow = cursorInfo ? cursorInfo.row : 'main';
+            const net=networks[ni];
+            const isOutput=ioType==='Q'||ioType==='T';
+            
+            // Ef cursor er á output reit (cell 4) og M er skrifað, setja coil
+            if(cursorInfo && targetCell===4 && targetRow==='main' && ioType==='M' && !net.mainCells[4]){
+                net.mainCells[4]={type:'coil-normal',io};
+                moveCursor(ni,4,'main');
+            }else if(isOutput){
+                // Q og T fara í output reit (cell 4)
+                if(!net.mainCells[4]){
+                    net.mainCells[4]={type,io};
+                    moveCursor(ni,4,'main');
+                }
+            }else if(cursorInfo && targetRow==='main' && targetCell!==null && targetCell<4 && !net.mainCells[targetCell]){
+                // Setja á cursor stað ef laust
+                net.mainCells[targetCell]={type:ioType==='M'?'contact-make':type,io};
+                const nextCell = targetCell<3 ? targetCell+1 : targetCell;
+                moveCursor(ni,nextCell,'main');
+            }else if(cursorInfo && targetRow==='branch' && net.branch && net.branch.cells && !net.branch.cells[targetCell]){
+                // Setja í branch á cursor stað
+                net.branch.cells[targetCell]={type:ioType==='M'?'contact-make':type,io};
+                moveCursor(ni,targetCell,'branch');
+            }else if(ioType==='M'){
+                // M - finna fyrsta lausa, eða fara í output sem coil
+                let placed=false;
+                for(let ci=0;ci<4;ci++){
+                    if(!net.mainCells[ci]){
+                        net.mainCells[ci]={type:'contact-make',io};
+                        moveCursor(ni,ci<3?ci+1:ci,'main');
+                        placed=true;
+                        break;
+                    }
+                }
+                if(!placed&&!net.mainCells[4]){
+                    net.mainCells[4]={type:'coil-normal',io};
+                    moveCursor(ni,4,'main');
+                }
+            }else{
+                // i - finna fyrsta lausa contact reit
+                for(let ci=0;ci<4;ci++){
+                    if(!net.mainCells[ci]){
+                        net.mainCells[ci]={type,io};
+                        moveCursor(ni,ci<3?ci+1:ci,'main');
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    clearTypeBuffer();
+}
+function setupKeyboardShortcuts(){
+    document.addEventListener('keydown',e=>{
+        if(e.target.tagName==='INPUT')return;
+        // Quick-type: skrifa i1, M2, M12, Q1 osfrv.
+        if(!e.ctrlKey&&!e.altKey&&!e.metaKey){
+            const key=e.key;
+            // Byrja á bókstaf (i, m, q, t)
+            if(/^[iImMqQtT]$/.test(key)&&typeBuffer===''){
+                e.preventDefault();
+                typeBuffer=key;
+                if(typeTimeout)clearTimeout(typeTimeout);
+                typeTimeout=setTimeout(clearTypeBuffer,1500);
+                return;
+            }
+            // Halda áfram með tölu
+            if(/^[0-9]$/.test(key)&&/^[iImMqQtT]\d?$/.test(typeBuffer)){
+                e.preventDefault();
+                typeBuffer+=key;
+                // Ef M og fyrsta tala er 1, bíða eftir annari tölu (M10-M16)
+                const isM = /^[mM]/.test(typeBuffer);
+                const hasOneDigit = /^[iImMqQtT]\d$/.test(typeBuffer);
+                const hasTwoDigits = /^[iImMqQtT]\d\d$/.test(typeBuffer);
+                if(hasTwoDigits){
+                    processTypeBuffer();
+                }else if(hasOneDigit){
+                    if(isM && typeBuffer[1]==='1'){
+                        // M1 - bíða aðeins eftir annarri tölu (gæti verið M10-M16)
+                        if(typeTimeout)clearTimeout(typeTimeout);
+                        typeTimeout=setTimeout(processTypeBuffer,400);
+                    }else{
+                        // Aðrar tölur - vinna strax
+                        processTypeBuffer();
+                    }
+                }
+                return;
+            }
+        }
+        // N fyrir nýtt network
+        if((e.key==='n'||e.key==='N')&&typeBuffer===''){e.preventDefault();addNetwork();cursorInfo={network:networks.length-1,cell:0,row:'main'};renderLadder();return;}
+        // Örvar til að fara á milli - virkar með cursor eða selection
+        const navInfo = cursorInfo || selectedInfo;
+        if(navInfo&&(e.code==='ArrowLeft'||e.code==='ArrowRight'||e.code==='ArrowUp'||e.code==='ArrowDown')){
+            e.preventDefault();
+            clearTypeBuffer();
+            const{network:ni,cell:ci,row}=navInfo;
+            const net=networks[ni];
+            if(e.code==='ArrowLeft'){
+                const minCell = row==='branch' ? net.branch.afterCell+1 : 0;
+                if(ci>minCell)moveCursor(ni,ci-1,row);
+            }else if(e.code==='ArrowRight'){
+                const maxCell=row==='main'?4:(net.branch?net.branch.returnAfterCell:0);
+                if(ci<maxCell)moveCursor(ni,ci+1,row);
+            }else if(e.code==='ArrowUp'){
+                if(row==='branch'){
+                    moveCursor(ni,ci,'main');
+                }else if(ni>0){
+                    moveCursor(ni-1,ci,'main');
+                }
+            }else if(e.code==='ArrowDown'){
+                if(row==='main'&&net.branch&&ci>net.branch.afterCell&&ci<=net.branch.returnAfterCell){
+                    moveCursor(ni,ci,'branch');
+                }else if(ni<networks.length-1){
+                    moveCursor(ni+1,ci,'main');
+                }
+            }
+            return;
+        }
+        if(!selectedComponent||!selectedInfo)return;
+        const{network:ni,cell:ci,row}=selectedInfo,net=networks[ni];
+        const comp=row==='branch'&&net.branch?net.branch.cells?.[ci]:net.mainCells[ci];
+        if(!comp)return;
+        const isCoil=comp.type.startsWith('coil'),isTimer=comp.type.startsWith('timer'),isContact=comp.type.startsWith('contact');
+        const reselect=()=>{renderLadder();setTimeout(()=>{const nc=document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="${row}"].cell-component`);if(nc)selectComponent(nc,ni,ci,row);},50);};
+        if(e.code==='Space'){e.preventDefault();if(isContact)comp.type=comp.type==='contact-make'?'contact-break':'contact-make';else if(isCoil){const t=['coil-normal','coil-set','coil-reset'];comp.type=t[(t.indexOf(comp.type)+1)%3];}else if(isTimer)comp.type=comp.type==='timer-ton'?'timer-tof':'timer-ton';reselect();}
+        if(e.code==='Delete'||e.code==='Backspace'){e.preventDefault();if(row==='branch'&&net.branch)net.branch.cells[ci]=null;else net.mainCells[ci]=null;selectedComponent=null;selectedInfo=null;renderLadder();}
+        if((e.key==='+'||e.key==='=')&&isContact&&row==='main'&&ci<4){e.preventDefault();addBranch(ni,ci);}
+    });
+    document.addEventListener('click',e=>{if(!e.target.closest('.cell-component')&&!e.target.closest('.branch-btn')){document.querySelectorAll('.cell-component').forEach(c=>c.classList.remove('selected'));selectedComponent=null;selectedInfo=null;}});
+}
+function toggleInput(btn){const inp=btn.dataset.input;if(activeSimTab==='conveyor'&&['i3','i4','i5'].includes(inp))return;inputState[inp]=!inputState[inp];btn.classList.toggle('active',inputState[inp]);}
+function updateDisplay(){
+    Object.keys(inputState).forEach(i=>{const btn=document.querySelector(`[data-input="${i}"]`);if(btn)btn.classList.toggle('active',inputState[i]);});
+    Object.keys(outputState).forEach(o=>document.getElementById('output-'+o)?.classList.toggle('active',outputState[o]));
+    Object.keys(markerState).forEach(m=>document.getElementById('marker-'+m)?.classList.toggle('active',markerState[m]));
+}
+function toggleSimulation(){
+    isRunning=!isRunning;
+    const btn=document.getElementById('run-btn'),ind=document.getElementById('running-indicator');
+    const t = translations[currentLang];
+    if(isRunning){btn.innerHTML=t.stop;btn.classList.replace('btn-success','btn-danger');ind.classList.add('active');simulationInterval=setInterval(simulate,100);}
+    else{btn.innerHTML=t.run;btn.classList.replace('btn-danger','btn-success');ind.classList.remove('active');clearInterval(simulationInterval);clearStates();}
+}
+function getState(io){if(!io)return false;if(io[0]==='i')return inputState[io]||false;if(io[0]==='M')return markerState[io]||false;if(io[0]==='Q')return outputState[io]||false;if(io[0]==='T')return timerState[io]?.output||false;return false;}
+function setState(io,val,set=false,reset=false){
+    if(io[0]==='M'){if(set){latchedMarkers[io]=true;markerState[io]=true;}else if(reset){latchedMarkers[io]=false;markerState[io]=false;}else markerState[io]=val;}
+    else if(io[0]==='Q'){if(set){latchedOutputs[io]=true;outputState[io]=true;}else if(reset){latchedOutputs[io]=false;outputState[io]=false;}else outputState[io]=val;}
+}
+function evalContact(comp){if(!comp)return true;const v=getState(comp.io);return comp.type==='contact-make'?v:!v;}
+function simulate(){
+    Object.keys(outputState).forEach(o=>outputState[o]=latchedOutputs[o]);
+    Object.keys(markerState).forEach(m=>markerState[m]=latchedMarkers[m]);
+    document.querySelectorAll('.cell-component').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('.power-rail').forEach(r=>r.classList.remove('active'));
+    document.querySelectorAll('svg line').forEach(l=>l.classList.remove('active'));
+    networks.forEach((net,ni)=>{
+        const branch=net.branch;
+        let beforeActive=true,mainMiddleActive=true,branchMiddleActive=true,afterActive=true;
+        if(branch){
+            for(let ci=0;ci<=branch.afterCell;ci++){const on=evalContact(net.mainCells[ci]);beforeActive=beforeActive&&on;if(on&&net.mainCells[ci])document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="main"].cell-component`)?.classList.add('active');}
+            for(let ci=branch.afterCell+1;ci<=branch.returnAfterCell;ci++){let on=evalContact(net.mainCells[ci]);mainMiddleActive=mainMiddleActive&&on;if(on&&net.mainCells[ci])document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="main"].cell-component`)?.classList.add('active');on=evalContact(branch.cells?.[ci]);branchMiddleActive=branchMiddleActive&&on;if(on&&branch.cells?.[ci])document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="branch"].cell-component`)?.classList.add('active');}
+            for(let ci=branch.returnAfterCell+1;ci<4;ci++){const on=evalContact(net.mainCells[ci]);afterActive=afterActive&&on;if(on&&net.mainCells[ci])document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="main"].cell-component`)?.classList.add('active');}
+        }else{for(let ci=0;ci<4;ci++){const on=evalContact(net.mainCells[ci]);beforeActive=beforeActive&&on;if(on&&net.mainCells[ci])document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="main"].cell-component`)?.classList.add('active');}}
+        let rungActive=branch?(beforeActive&&(mainMiddleActive||branchMiddleActive)&&afterActive):beforeActive;
+        if(rungActive){for(let ci=0;ci<=4;ci++)document.getElementById(`wire-main-${ni}-${ci}`)?.classList.add('active');document.getElementById(`rail-left-${ni}`)?.classList.add('active');document.getElementById(`rail-right-${ni}`)?.classList.add('active');}
+        if(branch&&beforeActive&&branchMiddleActive&&afterActive){['down','branch','up'].forEach(t=>document.getElementById(`wire-${t}-${ni}`)?.classList.add('active'));}
+        const out=net.mainCells[4];
+        if(out&&rungActive){
+            document.querySelector(`[data-network="${ni}"][data-cell="4"][data-row="main"].cell-component`)?.classList.add('active');
+            if(out.type==='coil-normal')setState(out.io,true);
+            else if(out.type==='coil-set')setState(out.io,true,true);
+            else if(out.type==='coil-reset')setState(out.io,false,false,true);
+            else if(out.type==='timer-ton'){const ts=timerState[out.io];ts.elapsed=Math.min(ts.elapsed+100,ts.preset);ts.output=ts.elapsed>=ts.preset;}
+            else if(out.type==='timer-tof'){const ts=timerState[out.io];ts.elapsed=ts.preset;ts.output=true;}
+        }else if(out?.type?.startsWith('timer')){const ts=timerState[out.io];if(out.type==='timer-ton'){ts.elapsed=0;ts.output=false;}else if(out.type==='timer-tof'){ts.elapsed=Math.max(ts.elapsed-100,0);ts.output=ts.elapsed>0;}}
+    });
+    updateDisplay();
+    updateTimerDisplays();
+    updateSimulation();
+}
+function updateTimerDisplays(){document.querySelectorAll('.cell-component[data-component-type^="timer"]').forEach(el=>{const io=el.dataset.io;if(io&&timerState[io]){const ts=timerState[io];const d=el.querySelector('.timer-display');if(d)d.textContent=`${(ts.elapsed/1000).toFixed(1)}/${(ts.preset/1000).toFixed(1)}s`;}});}
+function clearStates(){
+    document.querySelectorAll('.cell-component').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('.power-rail').forEach(r=>r.classList.remove('active'));
+    document.querySelectorAll('svg line').forEach(l=>l.classList.remove('active'));
+    Object.keys(outputState).forEach(o=>{outputState[o]=false;latchedOutputs[o]=false;});
+    Object.keys(markerState).forEach(m=>{markerState[m]=false;latchedMarkers[m]=false;});
+    Object.keys(timerState).forEach(t=>{timerState[t].elapsed=0;timerState[t].output=false;});
+    updateDisplay();renderLadder();
+}
+function clearAll(){if(confirm('Hreinsa allt?')){networks=[];addNetwork();clearStates();}}
+// === SIMULATION ===
+function updateSimulation(){if(activeSimTab==='conveyor')updateConveyor();else if(activeSimTab==='traffic')updateTraffic();}
+function updateConveyor(){
+    const belt=document.getElementById('conveyor-belt'),motorFwd=document.getElementById('motor-fwd'),motorRev=document.getElementById('motor-rev'),lightGreen=document.getElementById('light-green'),lightRed=document.getElementById('light-red');
+    belt.classList.remove('running','reverse');motorFwd.classList.remove('active');motorRev.classList.remove('active','reverse');
+    if(outputState.Q1&&!outputState.Q2){belt.classList.add('running');motorFwd.classList.add('active');}
+    else if(outputState.Q2&&!outputState.Q1){belt.classList.add('reverse');motorRev.classList.add('active','reverse');}
+    lightGreen.classList.toggle('active',outputState.Q3);lightRed.classList.toggle('active',outputState.Q4);
+    const speed=outputState.Q1?3:outputState.Q2?-3:0;
+    const minX=5,maxX=235;
+    boxes.forEach((box)=>{
+        box.x+=speed;
+        if(box.x<minX)box.x=minX;
+        if(box.x>maxX)box.x=maxX;
+        const boxEl=document.getElementById(`box-${box.id}`);
+        if(boxEl)boxEl.style.left=box.x+'px';
+    });
+    const s1=boxes.some(b=>b.x>=25&&b.x<=55),s2=boxes.some(b=>b.x>=110&&b.x<=140),s3=boxes.some(b=>b.x>=195&&b.x<=225);
+    inputState.i3=s1;inputState.i4=s2;inputState.i5=s3;
+    document.getElementById('sensor1-head').classList.toggle('active',s1);document.getElementById('sensor1-beam').classList.toggle('active',s1);
+    document.getElementById('sensor2-head').classList.toggle('active',s2);document.getElementById('sensor2-beam').classList.toggle('active',s2);
+    document.getElementById('sensor3-head').classList.toggle('active',s3);document.getElementById('sensor3-beam').classList.toggle('active',s3);
+}
+function spawnBox(){if(boxes.length>=3)return;boxIdCounter++;const startX=5;boxes.push({x:startX,id:boxIdCounter});const canvas=document.getElementById('conveyor-canvas');const boxEl=document.createElement('div');boxEl.className='box';boxEl.id=`box-${boxIdCounter}`;boxEl.style.left=startX+'px';boxEl.innerHTML='📦';canvas.appendChild(boxEl);}
+function resetConveyor(){boxes.forEach(b=>document.getElementById(`box-${b.id}`)?.remove());boxes=[];inputState.i3=false;inputState.i4=false;inputState.i5=false;updateDisplay();}
+function updateTraffic(){
+    document.getElementById('tl-red').style.background=outputState.Q1?'var(--error)':'#3a1a1a';
+    document.getElementById('tl-red').style.boxShadow=outputState.Q1?'0 0 15px var(--error)':'none';
+    document.getElementById('tl-yellow').style.background=outputState.Q2?'var(--warning)':'#3a3a1a';
+    document.getElementById('tl-yellow').style.boxShadow=outputState.Q2?'0 0 15px var(--warning)':'none';
+    document.getElementById('tl-green').style.background=outputState.Q3?'var(--success)':'#1a3a1a';
+    document.getElementById('tl-green').style.boxShadow=outputState.Q3?'0 0 15px var(--success)':'none';
+}
+init();
+spawnBox();
+</script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.1 LS - Gildissköl - EasySoft 8</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Opna valmynd"><span></span></button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html" style="text-decoration: none; color: inherit;">
+                    <div class="logo">
+                        <div class="logo-icon">ES</div>
+                        <div class="logo-text"><h1>EasySoft 8</h1><span>Kennsluvefur</span></div>
+                    </div>
+                </a>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label"><span>Framvinda</span><span id="progress-percent">0%</span></div>
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            </div>
+            <nav class="nav-section">
+                <!-- Navbar er byggður sjálfkrafa af JavaScript -->
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-wrapper">
+                <header class="lesson-header">
+                    <div class="breadcrumb">
+                        <a href="../index.html">Forsíða</a><span>›</span><span>Kafli 3: Blokkir</span><span>›</span><span>LS - Gildissköl</span>
+                    </div>
+                    <h1 class="lesson-title">LS - Gildissköl (Value Scaling)</h1>
+                    <div class="lesson-meta">
+                        <div class="meta-item"><span class="meta-icon">📖</span><span>Kafli 3.1</span></div>
+                        <div class="meta-item"><span class="meta-icon">⏱️</span><span>~20 mínútur</span></div>
+                        <div class="meta-item"><span class="meta-icon">🎯</span><span>Miðlungs</span></div>
+                    </div>
+                </header>
+
+                <div class="lesson-content">
+                    <section class="content-section">
+                        <h2 class="section-title">Hvað er LS blokk?</h2>
+                        <p class="content-text">
+                            LS (Value Scaling) blokkin er notuð til að <strong>umbreyta gildum</strong> úr einu sviði í annað. 
+                            Þetta er mjög gagnlegt þegar þú vinnur með skynjara sem gefa gildi á einu sniði, en þú þarft að sýna 
+                            eða nota gildin á öðru sniði.
+                        </p>
+                        <p class="content-text">
+                            EasyE4 býður upp á 32 LS blokkir: <strong>LS01</strong> til <strong>LS32</strong>.
+                        </p>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Hvernig virkar það?</h2>
+                        <p class="content-text">
+                            LS blokkin notar línulegan (linear) útreikning til að umbreyta gildum. Þú skilgreinir tvö punktapör 
+                            (X1, Y1) og (X2, Y2) og blokkin reiknar út nýju gildin.
+                        </p>
+
+                        <div class="demo-container">
+                            <div class="demo-title">Dæmi: Umbreyta 0-10000 í 0-600</div>
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 2rem; padding: 1rem; flex-wrap: wrap;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Upprunalegt svið</div>
+                                    <div style="background: var(--border); padding: 1rem 2rem; border-radius: 8px; font-family: 'JetBrains Mono', monospace;">
+                                        <div style="font-size: 1.5rem; font-weight: 600;">0 - 10000</div>
+                                        <div style="font-size: 0.8rem; color: var(--text-muted);">Skynjaragildi</div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 2rem; color: var(--primary);">→</div>
+                                <div style="text-align: center; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 1.5rem; border-radius: 12px;">
+                                    <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 0.5rem;">LS blokk</div>
+                                    <div style="font-family: 'JetBrains Mono', monospace; font-weight: 600;">LS01</div>
+                                </div>
+                                <div style="font-size: 2rem; color: var(--success);">→</div>
+                                <div style="text-align: center;">
+                                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Nýtt svið</div>
+                                    <div style="background: var(--success); padding: 1rem 2rem; border-radius: 8px; font-family: 'JetBrains Mono', monospace; color: var(--bg-dark);">
+                                        <div style="font-size: 1.5rem; font-weight: 600;">0 - 600</div>
+                                        <div style="font-size: 0.8rem; opacity: 0.8;">Lítrar</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Stærðfræðin á bak við</h2>
+                        <p class="content-text">
+                            LS blokkin notar formúlu beinnar línu til að umbreyta gildum:
+                        </p>
+                        
+                        <div style="background: var(--code-bg); padding: 1.5rem; border-radius: 12px; margin: 1.5rem 0; font-family: 'JetBrains Mono', monospace; text-align: center;">
+                            <div style="font-size: 1.25rem; margin-bottom: 1rem;">
+                                Y = m × X + Y₀
+                            </div>
+                            <div style="font-size: 0.9rem; color: var(--text-muted);">
+                                þar sem m = (Y2 - Y1) / (X2 - X1)
+                            </div>
+                        </div>
+
+                        <p class="content-text">
+                            Þú þarft bara að skilgreina <strong>tvö punktapör</strong>:
+                        </p>
+                        <ul class="content-list">
+                            <li><strong>X1, Y1</strong> = Fyrsti gagnapunktur (t.d. 0 → 0)</li>
+                            <li><strong>X2, Y2</strong> = Annar gagnapunktur (t.d. 10000 → 600)</li>
+                        </ul>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Inngangar og útgangar</h2>
+                        
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                                <thead>
+                                    <tr style="background: var(--border);">
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Inngang</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Tegund</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Lýsing</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">EN</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Bit</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Virkjar blokkina (1 = virk)</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">I1</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">DWord</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Inntaksgildi til að umbreyta</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">X1, Y1</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">DWord</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Fyrsti gagnapunktur</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">X2, Y2</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">DWord</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Annar gagnapunktur</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="overflow-x: auto; margin-top: 1.5rem;">
+                            <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                                <thead>
+                                    <tr style="background: var(--success); color: var(--bg-dark);">
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Útgang</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Tegund</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Lýsing</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">QV</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">DWord</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Umbreytt gildi (útkoma)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Raunverulegt dæmi: Fyllistig tanks</h2>
+                        <p class="content-text">
+                            Þrýstiskynjari í tanki gefur gildi frá 0 (tómur) til 10000 (fullur). Tankurinn heldur 600 lítrum 
+                            þegar hann er fullur. Við viljum sýna fyllistigið í lítrum.
+                        </p>
+
+                        <div class="info-box note">
+                            <span class="info-box-icon">📝</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Stillingar</div>
+                                <p class="info-box-text">
+                                    <strong>X1 = 0, Y1 = 0</strong> (þegar skynjari les 0, þá eru 0 lítrar)<br>
+                                    <strong>X2 = 10000, Y2 = 600</strong> (þegar skynjari les 10000, þá eru 600 lítrar)
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="image-placeholder">
+                            <div class="image-placeholder-icon">📷</div>
+                            <p class="image-placeholder-text">Hér kemur skjáskot af LS blokk í EasySoft</p>
+                            <span class="image-placeholder-label">ls-blokk-easysoft.png</span>
+                        </div>
+
+                        <div class="info-box tip">
+                            <span class="info-box-icon">💡</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Algeng notkun</div>
+                                <p class="info-box-text">
+                                    LS blokkin er oft notuð til að umbreyta 0-20 mA merkjum í 4-20 mA, eða til að sýna 
+                                    skynjaragildi í skiljanlegum einingum (lítrar, °C, metrar, o.s.frv.).
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Hvernig EN inngang virkar</h2>
+                        <p class="content-text">
+                            Þegar <strong>EN = 1</strong> er blokkin virk og umbreytir gildi. Þegar <strong>EN = 0</strong> 
+                            fer útgangur QV í 0.
+                        </p>
+
+                        <div class="info-box warning">
+                            <span class="info-box-icon">⚠️</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Athugið</div>
+                                <p class="info-box-text">
+                                    Ef þú vilt að blokkin sé alltaf virk, geturðu slökkt á „Function block release by EN is necessary" 
+                                    í stillingum blokkarinnar.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <nav class="lesson-nav">
+                    <a href="../kafli2/2-4-aefingar.html" class="nav-btn prev">
+                        <span class="nav-btn-icon">←</span>
+                        <span class="nav-btn-text"><span class="nav-btn-label">Fyrra</span><span class="nav-btn-title">Æfingar</span></span>
+                    </a>
+                    <a href="3-2-cp-blokk.html" class="nav-btn next" onclick="markLessonComplete('3-1')">
+                        <span class="nav-btn-icon">→</span>
+                        <span class="nav-btn-text"><span class="nav-btn-label">Næsta</span><span class="nav-btn-title">CP - Samanburður</span></span>
+                    </a>
+                </nav>
+            </div>
+        
+            <!-- Footer -->
+            <footer class="site-footer">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <img src="../images/foa-logo.png" alt="FÓA" class="footer-logo">
+                        <div class="footer-info">
+                            <span class="footer-author">Friðrik Óli Atlason</span>
+                            <span class="footer-desc">EasySoft 8 Kennsluvefur</span>
+                        </div>
+                    </div>
+                    <div class="footer-links">
+                        <a href="https://github.com/fridrikoli/easysoft-kennsla" target="_blank" rel="noopener">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="../js/nav-config.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

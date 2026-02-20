@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.2 CP - Samanburður - EasySoft 8</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Opna valmynd"><span></span></button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html" style="text-decoration: none; color: inherit;">
+                    <div class="logo">
+                        <div class="logo-icon">ES</div>
+                        <div class="logo-text"><h1>EasySoft 8</h1><span>Kennsluvefur</span></div>
+                    </div>
+                </a>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label"><span>Framvinda</span><span id="progress-percent">0%</span></div>
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            </div>
+            <nav class="nav-section">
+                <!-- Navbar er byggður sjálfkrafa af JavaScript -->
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-wrapper">
+                <header class="lesson-header">
+                    <div class="breadcrumb">
+                        <a href="../index.html">Forsíða</a><span>›</span><span>Kafli 3: Blokkir</span><span>›</span><span>CP - Samanburður</span>
+                    </div>
+                    <h1 class="lesson-title">CP - Samanburður (Comparator)</h1>
+                    <div class="lesson-meta">
+                        <div class="meta-item"><span class="meta-icon">📖</span><span>Kafli 3.2</span></div>
+                        <div class="meta-item"><span class="meta-icon">⏱️</span><span>~15 mínútur</span></div>
+                        <div class="meta-item"><span class="meta-icon">🎯</span><span>Miðlungs</span></div>
+                    </div>
+                </header>
+
+                <div class="lesson-content">
+                    <section class="content-section">
+                        <h2 class="section-title">Hvað er CP blokk?</h2>
+                        <p class="content-text">
+                            CP (Comparator) blokkin er notuð til að <strong>bera saman tvö gildi</strong> og segja til um 
+                            sambandið á milli þeirra: Minna en, Jafnt og, eða Stærra en.
+                        </p>
+                        <p class="content-text">
+                            EasyE4 býður upp á 32 CP blokkir: <strong>CP01</strong> til <strong>CP32</strong>.
+                        </p>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Hvernig virkar það?</h2>
+                        <p class="content-text">
+                            CP blokkin ber saman gildin á inngöngum <strong>I1</strong> og <strong>I2</strong> og gefur 
+                            þrjá bit-útganga sem segja til um niðurstöðuna:
+                        </p>
+
+                        <div class="demo-container">
+                            <div class="demo-title">Samanburðarútgangar</div>
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; padding: 1rem;">
+                                <div style="background: var(--border); padding: 1.5rem; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">＜</div>
+                                    <div style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--accent);">LT</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">Less Than</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">I1 < I2</div>
+                                </div>
+                                <div style="background: var(--border); padding: 1.5rem; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">＝</div>
+                                    <div style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--success);">EQ</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">Equal</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">I1 = I2</div>
+                                </div>
+                                <div style="background: var(--border); padding: 1.5rem; border-radius: 12px; text-align: center;">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">＞</div>
+                                    <div style="font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--primary);">GT</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">Greater Than</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">I1 > I2</div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Inngangar og útgangar</h2>
+                        
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                                <thead>
+                                    <tr style="background: var(--border);">
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Inngang</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Tegund</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Lýsing</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">EN</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Bit</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Virkjar blokkina (1 = virk)</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">I1</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">DWord</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Viðmiðunargildi (samanburðargrunnur)</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">I2</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">DWord</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Samanburðargildi</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div style="overflow-x: auto; margin-top: 1.5rem;">
+                            <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                                <thead>
+                                    <tr style="background: var(--success); color: var(--bg-dark);">
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Útgang</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Tegund</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Lýsing</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">LT</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Bit</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">1 ef I1 < I2</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">EQ</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Bit</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">1 ef I1 = I2</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">GT</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">Bit</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">1 ef I1 > I2</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Raunverulegt dæmi: Hitastig eftirlitið</h2>
+                        <p class="content-text">
+                            Við viljum kveikja á viðvörunarljósi ef hitastig fer yfir 80°C. Hitaskynjari gefur gildi í MD1.
+                        </p>
+
+                        <div class="ladder-diagram">
+                            <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.85rem;">CP blokk til að bera saman hitastig:</p>
+                            <div style="background: var(--bg-card); padding: 1.5rem; border-radius: 8px; margin-bottom: 1rem;">
+                                <div style="font-family: 'JetBrains Mono', monospace; line-height: 2;">
+                                    <div><span style="color: var(--text-muted);">I1:</span> <span style="color: var(--primary);">MD1</span> <span style="color: var(--text-muted);">(hitastig)</span></div>
+                                    <div><span style="color: var(--text-muted);">I2:</span> <span style="color: var(--accent);">80</span> <span style="color: var(--text-muted);">(hámarksgildi)</span></div>
+                                </div>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 1rem;">
+                                <div class="ladder-rail left" style="position: relative; width: 4px; height: 60px; background: var(--ladder-rail);"></div>
+                                <div class="ladder-wire" style="width: 40px;"></div>
+                                <div class="ladder-contact" style="background: rgba(0, 102, 204, 0.2); border-color: var(--primary);">CP01GT</div>
+                                <div class="ladder-wire" style="flex: 1;"></div>
+                                <div class="ladder-coil">Q0.2</div>
+                                <div class="ladder-wire" style="width: 40px;"></div>
+                                <div class="ladder-rail right" style="position: relative; width: 4px; height: 60px; background: var(--ladder-rail);"></div>
+                            </div>
+                            <p style="color: var(--text-muted); margin-top: 1rem; font-size: 0.85rem;">Ef MD1 > 80, þá kveikir á Q0.2 (viðvörunarljós)</p>
+                        </div>
+
+                        <div class="info-box tip">
+                            <span class="info-box-icon">💡</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Hvernig lesa útgang</div>
+                                <p class="info-box-text">
+                                    Í LADDER getur þú notað tengiliði eins og <strong>CP01GT</strong> (Greater Than útgangur af CP01) 
+                                    eða <strong>CP01LT</strong> (Less Than útgangur).
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Samsetning samanburða</h2>
+                        <p class="content-text">
+                            Þú getur notað útganga CP blokkarinnar til að búa til flóknari skilyrði:
+                        </p>
+                        
+                        <ul class="content-list">
+                            <li><strong>I1 ≤ I2</strong> = LT OR EQ (minna en eða jafnt og)</li>
+                            <li><strong>I1 ≥ I2</strong> = GT OR EQ (stærra en eða jafnt og)</li>
+                            <li><strong>I1 ≠ I2</strong> = LT OR GT (ekki jafnt og)</li>
+                        </ul>
+
+                        <div class="info-box warning">
+                            <span class="info-box-icon">⚠️</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Athugið gildasvið</div>
+                                <p class="info-box-text">
+                                    CP blokkin notar 32-bita heiltölur (DWord), sem þýðir að hún getur borið saman gildi 
+                                    frá -2.147.483.648 til +2.147.483.647.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Dæmi í LADDER</h2>
+                        
+                        <div class="image-placeholder">
+                            <div class="image-placeholder-icon">📷</div>
+                            <p class="image-placeholder-text">Hér kemur skjáskot af CP blokk í EasySoft</p>
+                            <span class="image-placeholder-label">cp-blokk-easysoft.png</span>
+                        </div>
+                    </section>
+                </div>
+
+                <nav class="lesson-nav">
+                    <a href="3-1-ls-blokk.html" class="nav-btn prev">
+                        <span class="nav-btn-icon">←</span>
+                        <span class="nav-btn-text"><span class="nav-btn-label">Fyrra</span><span class="nav-btn-title">LS - Gildissköl</span></span>
+                    </a>
+                    <a href="3-3-markerar.html" class="nav-btn next" onclick="markLessonComplete('3-2')">
+                        <span class="nav-btn-icon">→</span>
+                        <span class="nav-btn-text"><span class="nav-btn-label">Næsta</span><span class="nav-btn-title">Markerar (M, MW, MD)</span></span>
+                    </a>
+                </nav>
+            </div>
+        
+            <!-- Footer -->
+            <footer class="site-footer">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <img src="../images/foa-logo.png" alt="FÓA" class="footer-logo">
+                        <div class="footer-info">
+                            <span class="footer-author">Friðrik Óli Atlason</span>
+                            <span class="footer-desc">EasySoft 8 Kennsluvefur</span>
+                        </div>
+                    </div>
+                    <div class="footer-links">
+                        <a href="https://github.com/fridrikoli/easysoft-kennsla" target="_blank" rel="noopener">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="../js/nav-config.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

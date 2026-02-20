@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3.3 Markerar - EasySoft 8</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Opna valmynd"><span></span></button>
+    <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="../index.html" style="text-decoration: none; color: inherit;">
+                    <div class="logo">
+                        <div class="logo-icon">ES</div>
+                        <div class="logo-text"><h1>EasySoft 8</h1><span>Kennsluvefur</span></div>
+                    </div>
+                </a>
+            </div>
+            <div class="progress-container">
+                <div class="progress-label"><span>Framvinda</span><span id="progress-percent">0%</span></div>
+                <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+            </div>
+            <nav class="nav-section">
+                <!-- Navbar er byggður sjálfkrafa af JavaScript -->
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="content-wrapper">
+                <header class="lesson-header">
+                    <div class="breadcrumb">
+                        <a href="../index.html">Forsíða</a><span>›</span><span>Kafli 3: Blokkir</span><span>›</span><span>Markerar</span>
+                    </div>
+                    <h1 class="lesson-title">Markerar (M, MW, MD)</h1>
+                    <div class="lesson-meta">
+                        <div class="meta-item"><span class="meta-icon">📖</span><span>Kafli 3.3</span></div>
+                        <div class="meta-item"><span class="meta-icon">⏱️</span><span>~20 mínútur</span></div>
+                        <div class="meta-item"><span class="meta-icon">🎯</span><span>Miðlungs</span></div>
+                    </div>
+                </header>
+
+                <div class="lesson-content">
+                    <section class="content-section">
+                        <h2 class="section-title">Hvað eru markerar?</h2>
+                        <p class="content-text">
+                            Markerar (Markers) eru <strong>innri minnissvæði</strong> í PLC vélinni. Þeir virka eins og 
+                            breytur í forritun – þú getur geymt gildi í þeim, lesið úr þeim og notað til útreikninga.
+                        </p>
+                        <p class="content-text">
+                            Markerar eru mjög gagnlegir til að geyma millistig í útreikningum, stöður í kerfinu, eða 
+                            „hjálparbreytur" sem þú þarft í forritinu þínu.
+                        </p>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Tegundir markera</h2>
+                        <p class="content-text">
+                            Það eru fjórar aðaltegundir markera, hver með mismunandi gagnagerð og stærð:
+                        </p>
+
+                        <div class="block-grid" style="margin-top: 1.5rem;">
+                            <div class="block-card" style="border-left: 4px solid var(--accent);">
+                                <div class="block-card-icon">🔘</div>
+                                <div class="block-card-name">M - Marker (Bit)</div>
+                                <p class="block-card-desc">1 bit: ON/OFF gildi</p>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                    Svið: M1 - M512
+                                </div>
+                            </div>
+                            <div class="block-card" style="border-left: 4px solid var(--primary);">
+                                <div class="block-card-icon">📊</div>
+                                <div class="block-card-name">MB - Marker Byte</div>
+                                <p class="block-card-desc">8 bitar: 0 til 255</p>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                    Svið: MB1 - MB512
+                                </div>
+                            </div>
+                            <div class="block-card" style="border-left: 4px solid var(--success);">
+                                <div class="block-card-icon">📈</div>
+                                <div class="block-card-name">MW - Marker Word</div>
+                                <p class="block-card-desc">16 bitar: 0 til 65535</p>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                    Svið: MW1 - MW512
+                                </div>
+                            </div>
+                            <div class="block-card" style="border-left: 4px solid var(--warning);">
+                                <div class="block-card-icon">🔢</div>
+                                <div class="block-card-name">MD - Marker DWord</div>
+                                <p class="block-card-desc">32 bitar: ±2.147.483.647</p>
+                                <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+                                    Svið: MD1 - MD256
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">M (Bit Marker) vs MW/MD (Word Marker)</h2>
+                        
+                        <div class="demo-container">
+                            <div class="demo-title">Munurinn skýrður</div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; padding: 1rem;">
+                                <div>
+                                    <h4 style="color: var(--accent); margin-bottom: 1rem;">M - Bit Marker</h4>
+                                    <div style="background: var(--bg-dark); padding: 1rem; border-radius: 8px; font-family: 'JetBrains Mono', monospace;">
+                                        <div style="margin-bottom: 0.5rem;">M1 = <span style="color: var(--success);">1</span> (ON)</div>
+                                        <div style="margin-bottom: 0.5rem;">M2 = <span style="color: var(--text-muted);">0</span> (OFF)</div>
+                                        <div>M3 = <span style="color: var(--success);">1</span> (ON)</div>
+                                    </div>
+                                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 1rem;">
+                                        Notað fyrir: flögg, stöður, skilyrði
+                                    </p>
+                                </div>
+                                <div>
+                                    <h4 style="color: var(--warning); margin-bottom: 1rem;">MD - DWord Marker</h4>
+                                    <div style="background: var(--bg-dark); padding: 1rem; border-radius: 8px; font-family: 'JetBrains Mono', monospace;">
+                                        <div style="margin-bottom: 0.5rem;">MD1 = <span style="color: var(--primary);">12500</span></div>
+                                        <div style="margin-bottom: 0.5rem;">MD2 = <span style="color: var(--primary);">-340</span></div>
+                                        <div>MD3 = <span style="color: var(--primary);">999999</span></div>
+                                    </div>
+                                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 1rem;">
+                                        Notað fyrir: tölur, mælingar, útreikningar
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-box note">
+                            <span class="info-box-icon">ℹ️</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Hvenær nota hvað?</div>
+                                <p class="info-box-text">
+                                    <strong>M (Bit)</strong>: Þegar þú þarft að geyma ON/OFF stöðu, t.d. „er mótor í gangi?"<br>
+                                    <strong>MW/MD (Word)</strong>: Þegar þú þarft að geyma tölur, t.d. hitastig, hraða, talning.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Minnisuppbygging</h2>
+                        <p class="content-text">
+                            Mikilvægt er að skilja að MB, MW og MD <strong>deila sama minninu</strong>. Þetta þýðir að 
+                            breytingar á einu geta haft áhrif á annað.
+                        </p>
+
+                        <div style="background: var(--code-bg); padding: 1.5rem; border-radius: 12px; margin: 1.5rem 0; font-family: 'JetBrains Mono', monospace;">
+                            <div style="margin-bottom: 1rem; color: var(--text-muted);">Minnisuppbygging:</div>
+                            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <span style="color: var(--warning); min-width: 60px;">MD1</span>
+                                    <div style="display: flex; gap: 2px;">
+                                        <span style="background: var(--border); padding: 0.5rem 1rem; border-radius: 4px 0 0 4px;">Byte 4</span>
+                                        <span style="background: var(--border); padding: 0.5rem 1rem;">Byte 3</span>
+                                        <span style="background: var(--border); padding: 0.5rem 1rem;">Byte 2</span>
+                                        <span style="background: var(--border); padding: 0.5rem 1rem; border-radius: 0 4px 4px 0;">Byte 1</span>
+                                    </div>
+                                    <span style="color: var(--text-muted); font-size: 0.8rem;">32 bitar</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <span style="color: var(--success); min-width: 60px;">MW1</span>
+                                    <div style="display: flex; gap: 2px;">
+                                        <span style="background: var(--success); color: var(--bg-dark); padding: 0.5rem 1rem; border-radius: 4px 0 0 4px;">Byte 2</span>
+                                        <span style="background: var(--success); color: var(--bg-dark); padding: 0.5rem 1rem; border-radius: 0 4px 4px 0;">Byte 1</span>
+                                    </div>
+                                    <span style="color: var(--text-muted); font-size: 0.8rem;">16 bitar</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <span style="color: var(--primary); min-width: 60px;">MB1</span>
+                                    <div style="display: flex; gap: 2px;">
+                                        <span style="background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 4px;">Byte 1</span>
+                                    </div>
+                                    <span style="color: var(--text-muted); font-size: 0.8rem;">8 bitar</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-box warning">
+                            <span class="info-box-icon">⚠️</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Varúð við skörun</div>
+                                <p class="info-box-text">
+                                    Ef þú notar MD1, þá notar það sömu bæti og MW1, MW2, MB1, MB2, MB3 og MB4. 
+                                    Gættu þess að nota ekki sömu svæðin fyrir mismunandi tilgangi!
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Dæmi um notkun</h2>
+                        
+                        <h3 style="font-size: 1.1rem; margin: 1.5rem 0 1rem; color: var(--text-primary);">1. Bit Marker sem „flagga"</h3>
+                        <p class="content-text">
+                            Notaðu M til að muna hvort eitthvað hafi gerst:
+                        </p>
+                        <div class="ladder-diagram">
+                            <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.85rem;">Setja M1 ef I0.0 hefur einhvern tíma verið ON:</p>
+                            <div class="ladder-rung" style="display: flex; align-items: center; justify-content: space-between; padding: 0 1rem;">
+                                <div class="ladder-rail left" style="position: relative; width: 4px; height: 60px; background: var(--ladder-rail);"></div>
+                                <div class="ladder-wire" style="width: 40px;"></div>
+                                <div class="ladder-contact">I0.0</div>
+                                <div class="ladder-wire" style="flex: 1;"></div>
+                                <div class="ladder-coil set">S M1</div>
+                                <div class="ladder-wire" style="width: 40px;"></div>
+                                <div class="ladder-rail right" style="position: relative; width: 4px; height: 60px; background: var(--ladder-rail);"></div>
+                            </div>
+                        </div>
+
+                        <h3 style="font-size: 1.1rem; margin: 1.5rem 0 1rem; color: var(--text-primary);">2. DWord Marker til að geyma mælingu</h3>
+                        <p class="content-text">
+                            Notaðu MD með LS blokk til að umbreyta og geyma gildi:
+                        </p>
+
+                        <div class="info-box tip">
+                            <span class="info-box-icon">💡</span>
+                            <div class="info-box-content">
+                                <div class="info-box-title">Algengt mynstur</div>
+                                <p class="info-box-text">
+                                    Lestu skynjara í <strong>IA</strong> (Analog Input), umbreyttu með <strong>LS</strong> blokk, 
+                                    og geymdu niðurstöðuna í <strong>MD</strong> til að nota í samanburði (CP) eða birtingu.
+                                </p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section">
+                        <h2 class="section-title">Yfirlit yfir gagnategundir</h2>
+                        
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                                <thead>
+                                    <tr style="background: var(--border);">
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Tegund</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Stærð</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Svið</th>
+                                        <th style="padding: 1rem; text-align: left; border: 1px solid var(--border-light);">Dæmi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">BOOL (M)</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">1 bit</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">0 / 1</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">TRUE, FALSE</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">BYTE (MB)</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">8 bitar</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">0 til 255</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">128</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">WORD (MW)</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">16 bitar</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">0 til 65535</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">1023</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light); font-family: 'JetBrains Mono', monospace;">DWORD (MD)</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">32 bitar</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">±2.147.483.647</td>
+                                        <td style="padding: 1rem; border: 1px solid var(--border-light);">-65535</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </div>
+
+                <nav class="lesson-nav">
+                    <a href="3-2-cp-blokk.html" class="nav-btn prev">
+                        <span class="nav-btn-icon">←</span>
+                        <span class="nav-btn-text"><span class="nav-btn-label">Fyrra</span><span class="nav-btn-title">CP - Samanburður</span></span>
+                    </a>
+                    <a href="../upprifjun/blokkir.html" class="nav-btn next" onclick="markLessonComplete('3-3')">
+                        <span class="nav-btn-icon">→</span>
+                        <span class="nav-btn-text"><span class="nav-btn-label">Næsta</span><span class="nav-btn-title">Blokkayfirlit</span></span>
+                    </a>
+                </nav>
+            </div>
+        
+            <!-- Footer -->
+            <footer class="site-footer">
+                <div class="footer-content">
+                    <div class="footer-brand">
+                        <img src="../images/foa-logo.png" alt="FÓA" class="footer-logo">
+                        <div class="footer-info">
+                            <span class="footer-author">Friðrik Óli Atlason</span>
+                            <span class="footer-desc">EasySoft 8 Kennsluvefur</span>
+                        </div>
+                    </div>
+                    <div class="footer-links">
+                        <a href="https://github.com/fridrikoli/easysoft-kennsla" target="_blank" rel="noopener">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+    <script src="../js/nav-config.js"></script>
+    <script src="../js/main.js"></script>
+</body>
+</html>

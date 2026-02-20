@@ -1,0 +1,93 @@
+<!-- Sidebar Navigation Component -->
+<button class="mobile-menu-btn" onclick="toggleSidebar()" aria-label="Opna valmynd">
+    <span></span>
+</button>
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <a href="/index.html">
+            <div class="logo">
+                <div class="logo-icon">ES</div>
+                <div class="logo-text">
+                    <h1>EasySoft 8</h1>
+                    <span>Kennsluvefur</span>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-label">
+            <span>Framvinda</span>
+            <span id="progress-percent">0%</span>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+    </div>
+
+    <nav class="nav-section">
+        <!-- Kafli 1: Uppsetning -->
+        <div class="nav-chapter">
+            <div class="nav-chapter-title" onclick="toggleChapter(this)" data-chapter="1">
+                <div class="chapter-icon">⚙️</div>
+                <span>Kafli 1: Uppsetning vélar</span>
+            </div>
+            <div class="nav-lessons" id="chapter-1-lessons">
+                <a class="nav-lesson" href="/kafli1/1-1-ip-tala.html" data-lesson="1-1">
+                    <div class="lesson-status"></div>
+                    <span>1.1 IP tala stillingar</span>
+                </a>
+                <a class="nav-lesson" href="/kafli1/1-2-einingar.html" data-lesson="1-2">
+                    <div class="lesson-status"></div>
+                    <span>1.2 Einingar raðaðar saman</span>
+                </a>
+                <a class="nav-lesson" href="/kafli1/1-3-tenging.html" data-lesson="1-3">
+                    <div class="lesson-status"></div>
+                    <span>1.3 Tenging við EasySoft</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Kafli 2: SET/RESET -->
+        <div class="nav-chapter">
+            <div class="nav-chapter-title" onclick="toggleChapter(this)" data-chapter="2">
+                <div class="chapter-icon">⚡</div>
+                <span>Kafli 2: SET/RESET aðferð</span>
+            </div>
+            <div class="nav-lessons" id="chapter-2-lessons">
+                <a class="nav-lesson" href="/kafli2/2-1-set.html" data-lesson="2-1">
+                    <div class="lesson-status"></div>
+                    <span>2.1 Hvað er SET?</span>
+                </a>
+                <a class="nav-lesson" href="/kafli2/2-2-reset.html" data-lesson="2-2">
+                    <div class="lesson-status"></div>
+                    <span>2.2 Hvað er RESET?</span>
+                </a>
+                <a class="nav-lesson" href="/kafli2/2-3-saman.html" data-lesson="2-3">
+                    <div class="lesson-status"></div>
+                    <span>2.3 SET og RESET saman</span>
+                </a>
+                <a class="nav-lesson" href="/kafli2/2-4-aefingar.html" data-lesson="2-4">
+                    <div class="lesson-status"></div>
+                    <span>2.4 Æfingar</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Kafli 3: Upprifjun -->
+        <div class="nav-chapter">
+            <div class="nav-chapter-title" onclick="toggleChapter(this)" data-chapter="3">
+                <div class="chapter-icon">📚</div>
+                <span>Upprifjun og blokkir</span>
+            </div>
+            <div class="nav-lessons" id="chapter-3-lessons">
+                <a class="nav-lesson" href="/upprifjun/blokkir.html" data-lesson="3-1">
+                    <div class="lesson-status"></div>
+                    <span>Blokkayfirlit</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+</aside>

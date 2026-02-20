@@ -1,0 +1,3242 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LADDER Builder - Rafdeil VMA</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #0066cc; --success: #22c55e; --warning: #eab308; --error: #ef4444; --purple: #a855f7; --cyan: #06b6d4; --bg-dark: #0a0f1a; --bg-card: #111827; --bg-cell: #1a2332; --text-primary: #f8fafc; --text-secondary: #94a3b8; --text-muted: #64748b; --border: #1e293b; --wire: #3b82f6; --wire-active: #22c55e; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg-dark); color: var(--text-primary); min-height: 100vh; }
+        .header { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0.5rem 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .header h1 { font-size: 1.1rem; }
+        .header-controls { display: flex; gap: 0.4rem; align-items: center; }
+        .btn { padding: 0.35rem 0.6rem; border: none; border-radius: 5px; font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--error); color: white; }
+        .btn-secondary { background: var(--border); color: var(--text-primary); }
+        .help-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+        .help-modal-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; max-width: 500px; width: 90%; max-height: 80vh; overflow: hidden; }
+        .help-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); background: var(--bg-cell); }
+        .help-modal-header h2 { font-size: 1rem; }
+        .help-close { background: transparent; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
+        .help-close:hover { color: var(--text-primary); }
+        .help-modal-body { padding: 1rem; overflow-y: auto; max-height: 60vh; }
+        .help-modal-body h3 { font-size: 0.9rem; margin: 1rem 0 0.5rem 0; color: var(--primary); }
+        .help-modal-body h3:first-child { margin-top: 0; }
+        .help-modal-body ul { margin-left: 1.2rem; }
+        .help-modal-body li { margin-bottom: 0.3rem; font-size: 0.85rem; }
+        .help-modal-body kbd { background: var(--bg-dark); padding: 0.1rem 0.4rem; border-radius: 3px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; }
+        .help-modal-body p { font-size: 0.85rem; line-height: 1.5; }
+        .main-container { display: flex; height: calc(100vh - 45px); }
+        .toolbox { width: 150px; background: var(--bg-card); border-right: 1px solid var(--border); padding: 0.5rem; overflow-y: auto; display: flex; flex-direction: column; }
+        .toolbox-footer { margin-top: auto; padding: 0.75rem 0.5rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 0.5rem; }
+        .toolbox-logo { width: 40px; height: 40px; object-fit: contain; opacity: 0.9; flex-shrink: 0; }
+        .toolbox-info { display: flex; flex-direction: column; gap: 0.1rem; }
+        .toolbox-author { font-size: 0.65rem; color: var(--text-secondary); font-weight: 500; }
+        .toolbox-org { font-size: 0.6rem; color: var(--text-muted); }
+        .toolbox h3 { font-size: 0.6rem; color: var(--text-muted); margin-bottom: 0.3rem; text-transform: uppercase; padding: 0.2rem 0.3rem; border-radius: 3px; }
+        .toolbox h3.coils-header { background: rgba(234,179,8,0.15); color: var(--warning); }
+        .tool-section { margin-bottom: 0.5rem; }
+        .tool-item { background: var(--bg-cell); border: 2px solid var(--border); border-radius: 4px; padding: 0.25rem; margin-bottom: 0.2rem; cursor: grab; display: flex; align-items: center; gap: 0.3rem; font-size: 0.65rem; }
+        .tool-item:hover { border-color: var(--primary); }
+        .tool-symbol { font-family: 'JetBrains Mono', monospace; font-weight: 600; min-width: 30px; text-align: center; }
+        .canvas-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .io-panel { background: var(--bg-card); border-bottom: 1px solid var(--border); padding: 0.4rem 0.6rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+        .io-group { display: flex; gap: 0.2rem; align-items: center; }
+        .io-group-label { font-size: 0.55rem; color: var(--text-muted); margin-right: 0.15rem; }
+        .io-btn { width: 28px; height: 22px; border: 2px solid var(--border); border-radius: 3px; background: var(--bg-cell); color: var(--text-secondary); font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; cursor: pointer; }
+        .io-btn.input-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+        .io-btn.output-btn { cursor: default; }
+        .io-btn.output-btn.active { background: var(--success); border-color: var(--success); color: white; }
+        .io-btn.marker-btn { border-color: var(--purple); color: var(--purple); cursor: default; }
+        .io-btn.marker-btn.active { background: var(--purple); color: white; }
+        .ladder-container { flex: 1; overflow: auto; padding: 0.5rem; }
+        .ladder-grid { display: flex; flex-direction: column; min-width: 700px; }
+        .network { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 0.4rem; }
+        .network-header { background: var(--bg-cell); padding: 0.25rem 0.5rem; display: flex; align-items: center; gap: 0.5rem; border-radius: 6px 6px 0 0; }
+        .network-number { font-family: 'JetBrains Mono', monospace; font-weight: 600; color: var(--primary); font-size: 0.75rem; }
+        .network-title { flex: 1; background: transparent; border: none; color: var(--text-primary); font-size: 0.75rem; padding: 0.15rem 0.3rem; }
+        .network-title:focus { outline: none; background: var(--bg-dark); border-radius: 3px; }
+        .network-delete { background: transparent; border: 1px solid var(--error); color: var(--error); padding: 0.15rem 0.35rem; border-radius: 3px; font-size: 0.65rem; cursor: pointer; }
+        .network-body { padding: 0.5rem; }
+        .ladder-canvas { position: relative; min-height: 50px; }
+        .ladder-canvas.has-branch { min-height: 110px; }
+        .ladder-canvas svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .ladder-canvas svg line { stroke: var(--wire); stroke-width: 2; }
+        .ladder-canvas svg line.active { stroke: var(--wire-active); filter: drop-shadow(0 0 3px rgba(34,197,94,0.5)); }
+        .ladder-row { display: flex; align-items: center; height: 46px; position: relative; z-index: 2; }
+        .power-rail { width: 4px; height: 46px; background: var(--wire); border-radius: 2px; }
+        .power-rail.active { background: var(--wire-active); }
+        .ladder-cells { display: flex; flex: 1; height: 100%; align-items: center; }
+        .ladder-cell { width: 92px; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+        .ladder-cell.output-cell { width: 80px; background: rgba(234,179,8,0.08); border-radius: 4px; margin-left: 4px; }
+        .ladder-cell.drop-target { background: rgba(0,102,204,0.15); border-radius: 4px; }
+        .ladder-cell.cursor { background: rgba(0,102,204,0.2); border-radius: 4px; }
+        .ladder-cell.cursor::before { content: '▼'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); color: var(--primary); font-size: 10px; animation: cursorBlink 0.8s ease-in-out infinite; }
+        @keyframes cursorBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .branch-row { display: flex; align-items: center; height: 46px; position: relative; z-index: 1; margin-left: 4px; margin-top: 6px; }
+        .branch-spacer { flex-shrink: 0; }
+        .branch-cells { display: flex; height: 100%; align-items: center; position: relative; }
+        .branch-cell { width: 92px; height: 100%; display: flex; align-items: center; justify-content: center; position: relative; }
+        .branch-cell.cursor { background: rgba(0,102,204,0.2); border-radius: 4px; }
+        .branch-cell.cursor::before { content: '▼'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); color: var(--primary); font-size: 10px; animation: cursorBlink 0.8s ease-in-out infinite; }
+        .branch-controls { position: absolute; top: 50%; transform: translateY(-50%); display: flex; gap: 1px; z-index: 10; background: var(--bg-card); padding: 2px; border-radius: 3px; border: 1px solid var(--border); }
+        .branch-controls.start-controls { left: -26px; }
+        .branch-controls.end-controls { right: -26px; }
+        .branch-btn { width: 16px; height: 16px; background: var(--primary); border: none; border-radius: 2px; color: white; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .branch-btn.delete { background: var(--error); }
+        .branch-btn.add { background: var(--success); font-weight: bold; }
+        .branch-btn:disabled { opacity: 0.3; }
+        .cell-component { background: var(--bg-card); border: 2px solid var(--border); border-radius: 4px; padding: 0.15rem 0.2rem; min-width: 54px; text-align: center; cursor: pointer; z-index: 3; }
+        .cell-component:hover { border-color: var(--primary); }
+        .cell-component.dragging { opacity: 0.3; }
+        .cell-component.selected { border-color: #ff6b35; box-shadow: 0 0 8px rgba(255,107,53,0.4); }
+        .cell-component.active { background: rgba(34,197,94,0.2); border-color: var(--success); }
+        .cell-component .component-symbol { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; font-weight: 600; line-height: 1.1; }
+        .cell-component .component-label { font-size: 0.55rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .cell-component.contact-make .component-symbol { color: var(--success); }
+        .cell-component.contact-break .component-symbol { color: var(--error); }
+        .cell-component.coil-normal .component-symbol { color: var(--warning); }
+        .cell-component.coil-set .component-symbol { color: var(--success); }
+        .cell-component.coil-reset .component-symbol { color: var(--error); }
+        .cell-component.timer-ton, .cell-component.timer-tof { padding: 0.1rem; min-width: 70px; }
+        .cell-component.timer-ton .component-symbol, .cell-component.timer-tof .component-symbol { color: var(--cyan); }
+        .cell-component[data-io-type="M"] { border-color: var(--purple); }
+        .cell-component[data-io-type="M"].active { border-color: var(--success); background: rgba(34,197,94,0.25); }
+        .cell-component[data-io-type="M"] .component-label { color: var(--purple); }
+        .cell-component[data-io-type="Q"] { border-color: var(--warning); background: rgba(234,179,8,0.1); }
+        .cell-component[data-io-type="Q"].active { border-color: var(--success); background: rgba(34,197,94,0.25); }
+        .cell-component[data-io-type="T"] { border-color: var(--cyan); background: rgba(6,182,212,0.05); }
+        .cell-component[data-io-type="T"].active { border-color: var(--success); background: rgba(34,197,94,0.25); }
+        .cell-component[data-io-type="C"] { border-color: var(--purple); background: rgba(168,85,247,0.08); }
+        .cell-component[data-io-type="C"].active { border-color: var(--success); background: rgba(34,197,94,0.25); }
+        .cell-component[data-io-type="A"] { border-color: #f97316; background: rgba(249,115,22,0.08); }
+        .cell-component[data-io-type="A"].active { border-color: var(--success); background: rgba(34,197,94,0.25); }
+        .cell-component.counter { padding: 0; min-width: 120px; align-self: flex-start; margin-top: 0; overflow: visible; }
+        .timer-block, .counter-block { display: flex; flex-direction: column; width: 100%; }
+        /* Counter blokk - 3 línur */
+        .counter-block-3row { display: flex; flex-direction: column; width: 100%; font-family: 'JetBrains Mono', monospace; }
+        .counter-row-input { display: flex; align-items: center; height: 24px; border-bottom: 1px solid rgba(168,85,247,0.2); }
+        .counter-row-input:last-of-type { border-bottom: none; }
+        .counter-row-input .row-arrow { font-size: 0.5rem; color: var(--border); width: 20px; text-align: center; }
+        .counter-row-input.active .row-arrow { color: var(--success); }
+        .counter-row-input .row-label { font-size: 0.55rem; font-weight: 700; color: var(--purple); width: 14px; }
+        .counter-row-input.active .row-label { color: var(--success); }
+        .counter-row-input .row-content { flex: 1; display: flex; justify-content: space-between; align-items: center; padding: 0 0.2rem; font-size: 0.5rem; }
+        .counter-row-input .row-content .counter-type { font-weight: 700; color: var(--purple); }
+        .counter-row-input .row-content .counter-name { color: var(--text-muted); }
+        .counter-row-input .row-content .counter-label { color: var(--text-muted); }
+        .counter-row-input .row-content .counter-value { color: var(--purple); font-weight: 600; }
+        .counter-row-input .row-content .counter-value.active { color: var(--success); }
+        .counter-row-input .row-output { font-size: 0.5rem; color: var(--border); width: 35px; text-align: right; padding-right: 2px; }
+        .counter-row-input .row-output.active { color: var(--success); }
+        .counter-bar-row { padding: 0.15rem 0.25rem; }
+        .counter-bar-row .counter-bar { height: 4px; margin: 0; }
+        .timer-header, .counter-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--cyan); padding-bottom: 0.1rem; margin-bottom: 0.1rem; }
+        .counter-header { border-bottom-color: var(--purple); }
+        .timer-type, .counter-type { font-family: 'JetBrains Mono', monospace; font-size: 0.65rem; font-weight: 600; color: var(--cyan); }
+        .timer-name, .counter-name { font-family: 'JetBrains Mono', monospace; font-size: 0.55rem; color: var(--text-muted); }
+        .timer-row, .counter-row { display: flex; justify-content: space-between; align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 0.5rem; }
+        .timer-label, .counter-label { color: var(--text-muted); }
+        .timer-value, .counter-value { color: var(--cyan); font-weight: 600; }
+        .timer-value.active, .counter-value.active { color: var(--success); }
+        .timer-bar, .counter-bar { height: 3px; background: var(--border); border-radius: 1px; margin-top: 0.1rem; overflow: hidden; }
+        .timer-bar-fill, .counter-bar-fill { height: 100%; background: var(--cyan); transition: width 0.1s linear; }
+        .counter-bar-fill { background: var(--purple); }
+        .timer-bar-fill.complete, .counter-bar-fill.complete { background: var(--success); }
+        /* Network með counter - parallel línur */
+        .network.has-counter .ladder-canvas { min-height: 160px; padding-top: 5px; }
+        .counter-branch { margin-top: -2px; }
+        .counter-branch-cells { gap: 0; position: relative; }
+        .counter-line-label { position: absolute; left: -18px; top: 50%; transform: translateY(-50%); font-size: 0.55rem; color: var(--purple); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .counter-line-cell { width: 92px; }
+        .counter-line-cell.cursor { background: rgba(168,85,247,0.15); border-radius: 3px; }
+        /* Analog Compare */
+        .cell-component.compare { padding: 0.1rem; min-width: 74px; }
+        .cell-component.compare .component-symbol { color: #f97316; }
+        .compare-block { display: flex; flex-direction: column; width: 100%; font-family: 'JetBrains Mono', monospace; }
+        .compare-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f97316; padding-bottom: 0.1rem; margin-bottom: 0.1rem; }
+        .compare-type { font-size: 0.6rem; font-weight: 600; color: #f97316; }
+        .compare-name { font-size: 0.5rem; color: var(--text-muted); }
+        .compare-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.5rem; }
+        .compare-label { color: var(--text-muted); }
+        .compare-value { color: #f97316; font-weight: 600; }
+        .compare-value.active { color: var(--success); }
+        .compare-op { color: #f97316; font-weight: 700; font-size: 0.6rem; text-align: center; padding: 0.05rem 0; }
+        .compare-bar { height: 3px; background: var(--border); border-radius: 1px; margin-top: 0.1rem; overflow: hidden; }
+        .compare-bar-fill { height: 100%; background: #f97316; transition: width 0.1s linear; }
+        .compare-bar-fill.active { background: var(--success); }
+        /* Analog sliders */
+        .analog-group { display: flex; gap: 0.3rem; align-items: center; }
+        .analog-slider-wrapper { display: flex; flex-direction: column; align-items: center; gap: 0; }
+        .analog-slider-wrapper { display: flex; flex-direction: column; align-items: center; gap: 0; cursor: pointer; padding: 1px; border-radius: 3px; border: 1px solid transparent; }
+        .analog-slider-wrapper.selected { border-color: #f97316; background: rgba(249,115,22,0.1); }
+        .analog-label { font-size: 0.45rem; color: #f97316; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .analog-slider { -webkit-appearance: none; appearance: none; width: 50px; height: 10px; border-radius: 3px; background: var(--bg-cell); border: 1px solid #f97316; outline: none; cursor: pointer; }
+        .analog-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 10px; height: 14px; border-radius: 2px; background: #f97316; cursor: pointer; }
+        .analog-slider::-moz-range-thumb { width: 10px; height: 14px; border-radius: 2px; background: #f97316; cursor: pointer; border: none; }
+        .analog-val { font-size: 0.4rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; min-width: 22px; text-align: center; }
+        .help-panel { background: var(--bg-card); border-top: 1px solid var(--border); padding: 0.3rem 0.6rem; font-size: 0.6rem; color: var(--text-secondary); }
+        .help-panel kbd { background: var(--border); padding: 0.05rem 0.15rem; border-radius: 2px; font-size: 0.55rem; }
+        .help-items { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+        .delete-zone { position: fixed; bottom: 45px; right: 320px; width: 45px; height: 45px; background: var(--error); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; opacity: 0; transform: scale(0.5); transition: all 0.3s; pointer-events: none; z-index: 100; }
+        .delete-zone.visible { opacity: 1; transform: scale(1); pointer-events: auto; }
+        .running-indicator { display: none; align-items: center; gap: 0.25rem; padding: 0.25rem 0.5rem; background: var(--success); color: white; border-radius: 4px; animation: pulse 1s infinite; font-size: 0.7rem; }
+        .running-indicator.active { display: flex; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        /* Simulation Sidebar - split: props efst, hermir neðst */
+        .sim-sidebar { width: 300px; background: var(--bg-card); border-left: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+        /* Props section efst - stækkar eftir þörfum */
+        .props-section { border-bottom: 2px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
+        .props-section-header { padding: 0.3rem 0.5rem; font-size: 0.7rem; font-weight: 600; background: var(--bg-cell); border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+        .props-section-body { overflow-y: auto; }
+        /* Sim section neðst - tekur rest af plássi */
+        .sim-section { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+        .sim-section-header { padding: 0.3rem 0.5rem; font-size: 0.7rem; font-weight: 600; background: var(--bg-cell); border-bottom: 1px solid var(--border); color: var(--text-secondary); }
+        .sim-tabs { display: flex; border-bottom: 1px solid var(--border); }
+        .sim-tab { flex: 1; padding: 0.3rem; background: transparent; border: none; color: var(--text-muted); font-size: 0.6rem; cursor: pointer; border-bottom: 2px solid transparent; }
+        .sim-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--bg-cell); }
+        .sim-content { flex: 1; overflow-y: auto; }
+        .sim-panel { display: none; padding: 0.5rem; }
+        .sim-panel.active { display: block; }
+        .task-info { background: var(--bg-cell); border-radius: 5px; padding: 0.4rem; margin-bottom: 0.4rem; }
+        .task-info h4 { font-size: 0.65rem; color: #ff6b35; margin-bottom: 0.2rem; }
+        .task-info p { font-size: 0.55rem; color: var(--text-secondary); line-height: 1.3; }
+        .task-io { margin-top: 0.25rem; padding-top: 0.25rem; border-top: 1px solid var(--border); }
+        .task-io-item { font-size: 0.5rem; font-family: 'JetBrains Mono', monospace; padding: 0.08rem 0; display: flex; align-items: center; gap: 0.2rem; }
+        .io-label { min-width: 18px; padding: 0.05rem 0.1rem; border-radius: 2px; text-align: center; font-size: 0.45rem; }
+        .io-label.input { background: var(--primary); color: white; }
+        .io-label.output { background: var(--success); color: white; }
+        .sim-canvas { background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%); border-radius: 6px; position: relative; height: 200px; overflow: hidden; border: 1px solid var(--border); }
+        .conveyor { position: absolute; bottom: 30px; left: 15px; right: 15px; height: 20px; background: #2d2d2d; border-radius: 3px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+        .conveyor-belt { position: absolute; top: 0; left: 0; width: 200%; height: 100%; background: repeating-linear-gradient(90deg, #3d3d3d 0px, #3d3d3d 15px, #4a4a4a 15px, #4a4a4a 30px); }
+        .conveyor-belt.running { animation: beltMove 0.5s linear infinite; }
+        .conveyor-belt.reverse { animation: beltMoveReverse 0.5s linear infinite; }
+        @keyframes beltMove { from { transform: translateX(-30px); } to { transform: translateX(0); } }
+        @keyframes beltMoveReverse { from { transform: translateX(0); } to { transform: translateX(-30px); } }
+        .conveyor-leg { position: absolute; bottom: -15px; width: 8px; height: 15px; background: #555; }
+        .conveyor-leg.left { left: 10px; }
+        .conveyor-leg.right { right: 10px; }
+        .box { position: absolute; bottom: 52px; width: 30px; height: 30px; background: linear-gradient(135deg, #d4a017 0%, #aa8414 100%); border: 2px solid #c9a227; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; box-shadow: 2px 2px 4px rgba(0,0,0,0.3); transition: left 0.05s linear; }
+        .sensor { position: absolute; bottom: 55px; display: flex; flex-direction: column; align-items: center; }
+        .sensor-post { width: 6px; height: 40px; background: linear-gradient(180deg, #666 0%, #444 100%); border-radius: 2px; }
+        .sensor-head { width: 12px; height: 12px; background: #333; border-radius: 50%; border: 2px solid #555; margin-bottom: 2px; transition: all 0.1s; }
+        .sensor-head.active { background: var(--error); border-color: var(--error); box-shadow: 0 0 10px var(--error); }
+        .sensor-beam { position: absolute; top: 14px; width: 2px; height: 32px; background: rgba(255,0,0,0.2); }
+        .sensor-beam.active { background: rgba(255,0,0,0.8); box-shadow: 0 0 5px red; }
+        .sensor-label { font-size: 0.5rem; color: var(--text-muted); margin-top: 2px; }
+        /* Conveyor buttons & turn lights */
+        .conv-buttons { position: absolute; top: 6px; left: 6px; display: flex; gap: 6px; z-index: 5; }
+        .conv-start-btn, .conv-stop-btn { display: flex; flex-direction: column; align-items: center; gap: 2px; background: none; border: none; cursor: pointer; }
+        .conv-btn-circle { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #555; transition: all 0.15s; }
+        .conv-btn-circle.green { background: #1a3a1a; }
+        .conv-btn-circle.red { background: #3a1a1a; }
+        .conv-start-btn.active .conv-btn-circle.green { background: var(--success); box-shadow: 0 0 10px var(--success); border-color: var(--success); }
+        .conv-stop-btn.active .conv-btn-circle.red { background: var(--error); box-shadow: 0 0 10px var(--error); border-color: var(--error); }
+        .conv-start-btn span, .conv-stop-btn span { font-size: 0.4rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .conv-motor-under { position: absolute; bottom: 10px; left: 15px; right: 15px; display: flex; justify-content: space-between; }
+        .conv-turn-lights { position: absolute; top: 6px; right: 8px; display: flex; flex-direction: column; gap: 3px; z-index: 5; background: #222; padding: 4px; border-radius: 6px; border: 2px solid #444; }
+        .conv-turn-light { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #333; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+        .conv-turn-light span { font-size: 0.4rem; font-family: 'JetBrains Mono', monospace; color: rgba(255,255,255,0.3); font-weight: 700; }
+        .conv-turn-light.active-r { background: var(--error) !important; box-shadow: 0 0 12px var(--error); }
+        .conv-turn-light.active-y { background: var(--warning) !important; box-shadow: 0 0 12px var(--warning); }
+        .conv-turn-light.active-g { background: var(--success) !important; box-shadow: 0 0 12px var(--success); }
+        .conv-turn-light.active-r span, .conv-turn-light.active-y span, .conv-turn-light.active-g span { color: white; }
+        .status-panel { display: flex; gap: 0.3rem; }
+        .status-item { padding: 0.15rem 0.3rem; background: var(--bg-cell); border-radius: 3px; font-size: 0.5rem; font-family: 'JetBrains Mono', monospace; border: 1px solid var(--border); }
+        .status-item.active { background: var(--success); border-color: var(--success); }
+        .status-item.reverse { background: var(--warning); border-color: var(--warning); color: #000; }
+        .lights-panel { position: absolute; top: 8px; right: 8px; display: flex; gap: 0.25rem; }
+        .light { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #333; }
+        .light.green { background: #1a3a1a; }
+        .light.green.active { background: var(--success); box-shadow: 0 0 12px var(--success); }
+        .light.red { background: #3a1a1a; }
+        .light.red.active { background: var(--error); box-shadow: 0 0 12px var(--error); }
+        .sim-controls { padding: 0.4rem; border-top: 1px solid var(--border); display: flex; gap: 0.25rem; }
+        .sim-btn { padding: 0.25rem 0.4rem; font-size: 0.6rem; border-radius: 3px; cursor: pointer; border: 1px solid var(--border); background: var(--bg-cell); color: var(--text-primary); }
+        .sim-btn:hover { border-color: var(--primary); }
+        /* Properties Panel */
+        .prop-empty { padding: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.75rem; }
+        .prop-empty-icon { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.4; }
+        .prop-card { background: var(--bg-cell); border-radius: 6px; margin: 0.4rem; overflow: hidden; }
+        .prop-card-header { display: flex; align-items: center; gap: 0.4rem; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border); }
+        .prop-card-icon { font-size: 1rem; }
+        .prop-card-title { font-size: 0.75rem; font-weight: 600; }
+        .prop-card-subtitle { font-size: 0.55rem; color: var(--text-muted); margin-left: auto; font-family: 'JetBrains Mono', monospace; }
+        .prop-section { padding: 0.4rem 0.5rem; }
+        .prop-section + .prop-section { border-top: 1px solid var(--border); }
+        .prop-section-title { font-size: 0.55rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.3rem; font-weight: 600; }
+        .prop-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.3rem; }
+        .prop-label { font-size: 0.7rem; color: var(--text-secondary); }
+        .prop-value { font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; color: var(--text-primary); font-weight: 600; }
+        .prop-select, .prop-input { background: var(--bg-dark); border: 1px solid var(--border); color: var(--text-primary); font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; padding: 0.2rem 0.3rem; border-radius: 4px; outline: none; }
+        .prop-select:focus, .prop-input:focus { border-color: var(--primary); }
+        .prop-select { cursor: pointer; min-width: 70px; }
+        .prop-input { width: 70px; text-align: right; }
+        .prop-slider-row { display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.3rem; }
+        .prop-slider { -webkit-appearance: none; appearance: none; flex: 1; height: 6px; border-radius: 3px; background: var(--border); outline: none; }
+        .prop-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--primary); cursor: pointer; }
+        .prop-slider::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: var(--primary); cursor: pointer; border: none; }
+        .prop-slider.orange::-webkit-slider-thumb { background: #f97316; }
+        .prop-slider.orange::-moz-range-thumb { background: #f97316; }
+        .prop-slider.cyan::-webkit-slider-thumb { background: var(--cyan); }
+        .prop-slider.cyan::-moz-range-thumb { background: var(--cyan); }
+        .prop-slider.purple::-webkit-slider-thumb { background: var(--purple); }
+        .prop-slider.purple::-moz-range-thumb { background: var(--purple); }
+        .prop-status { display: flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.5rem; font-size: 0.65rem; }
+        .prop-status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); }
+        .prop-status-dot.active { background: var(--success); box-shadow: 0 0 6px var(--success); }
+        .prop-status-label { color: var(--text-muted); }
+        .prop-btn-row { display: flex; gap: 0.3rem; padding: 0.3rem 0.5rem; }
+        .prop-btn { flex: 1; padding: 0.3rem; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-dark); color: var(--text-secondary); font-size: 0.65rem; cursor: pointer; text-align: center; }
+        .prop-btn:hover { border-color: var(--primary); color: var(--text-primary); }
+        .prop-btn.danger:hover { border-color: var(--error); color: var(--error); }
+        /* Analog props */
+        .prop-analog-big { padding: 0.5rem; }
+        .prop-analog-big .prop-slider { height: 10px; border-radius: 5px; margin: 0.4rem 0; }
+        .prop-analog-big .prop-slider::-webkit-slider-thumb { width: 20px; height: 20px; background: #f97316; }
+        .prop-analog-big .prop-slider::-moz-range-thumb { width: 20px; height: 20px; background: #f97316; }
+        .prop-volt-display { display: flex; align-items: center; justify-content: center; gap: 0.3rem; padding: 0.4rem; background: var(--bg-dark); border-radius: 6px; border: 1px solid #f97316; margin: 0.3rem 0; }
+        .prop-volt-value { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 700; color: #f97316; }
+        .prop-volt-unit { font-size: 0.75rem; color: var(--text-muted); }
+        .prop-volt-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin: 0.3rem 0; }
+        .prop-volt-bar-fill { height: 100%; background: linear-gradient(90deg, #22c55e 0%, #eab308 50%, #ef4444 100%); border-radius: 4px; transition: width 0.1s; }
+        .prop-analog-item { padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--border); }
+        .prop-analog-item:last-of-type { border-bottom: none; }
+        .prop-analog-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.15rem; }
+        .prop-analog-name { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; font-weight: 700; color: #f97316; }
+        .prop-analog-volt { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; color: #f97316; }
+        .flag-icon { width: 20px; height: 14px; border-radius: 2px; vertical-align: middle; }
+        /* Tank simulation */
+        .sim-canvas.tank-tall { height: 240px; }
+        .tank-container { position: relative; width: 100%; height: 100%; padding: 4px; }
+        .tank-body { width: 100px; height: 180px; border: 3px solid #64748b; border-top: 2px solid #64748b; border-radius: 0 0 8px 8px; position: absolute; left: 50%; top: 10px; transform: translateX(-50%); overflow: hidden; background: #0a1628; }
+        .tank-water { position: absolute; bottom: 0; left: 0; right: 0; height: 0%; background: linear-gradient(180deg, rgba(59,130,246,0.6) 0%, rgba(37,99,235,0.9) 100%); transition: height 0.15s linear; }
+        .tank-water.filling { animation: tankWave 1s ease-in-out infinite; }
+        @keyframes tankWave { 0%,100% { opacity: 0.9; } 50% { opacity: 1; } }
+        .tank-level-marks { position: absolute; top: 0; right: 2px; bottom: 0; display: flex; flex-direction: column; justify-content: flex-end; z-index: 2; }
+        .tank-mark { position: absolute; right: 0; display: flex; align-items: center; gap: 2px; }
+        .tank-mark::before { content: ''; width: 6px; height: 1px; background: rgba(255,255,255,0.3); }
+        .tank-mark span { font-size: 0.35rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+        .tank-level-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; color: white; z-index: 3; text-shadow: 0 0 8px rgba(0,0,0,0.8); }
+        .tank-pump { position: absolute; bottom: 8px; display: flex; flex-direction: column; align-items: center; z-index: 4; }
+        .tank-pump-body { width: 30px; height: 30px; background: var(--bg-cell); border: 2px solid #556; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+        .tank-pump-impeller { width: 16px; height: 16px; border: 2px solid #556; border-radius: 50%; position: relative; }
+        .tank-pump-impeller::before, .tank-pump-impeller::after { content: ''; position: absolute; background: #556; }
+        .tank-pump-impeller::before { width: 2px; height: 100%; left: 50%; transform: translateX(-50%); }
+        .tank-pump-impeller::after { width: 100%; height: 2px; top: 50%; transform: translateY(-50%); }
+        .tank-pump.active .tank-pump-body { border-color: var(--success); background: rgba(34,197,94,0.08); }
+        .tank-pump.active .tank-pump-impeller { border-color: var(--success); animation: pumpSpin 0.4s linear infinite; }
+        .tank-pump.active .tank-pump-impeller::before, .tank-pump.active .tank-pump-impeller::after { background: var(--success); }
+        @keyframes pumpSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .tank-pump-label { font-size: 0.4rem; color: var(--text-muted); text-align: center; line-height: 1.1; margin-top: 2px; }
+        .tank-pump.active .tank-pump-label { color: var(--success); }
+        .tank-pipe-up { position: absolute; width: 4px; background: #475569; border-radius: 1px; }
+        .tank-pipe-up.active { background: var(--primary); box-shadow: 0 0 5px var(--primary); animation: pipeFlow 0.4s linear infinite; }
+        .tank-pipe-elbow { position: absolute; width: 10px; height: 10px; border-top: 4px solid #475569; border-right: 4px solid #475569; border-radius: 0 6px 0 0; }
+        .tank-pipe-elbow.active { border-color: var(--primary); box-shadow: 0 0 3px var(--primary); }
+        .tank-pipe-horiz { position: absolute; height: 4px; background: #475569; border-radius: 1px; }
+        .tank-pipe-horiz.active { background: var(--primary); box-shadow: 0 0 5px var(--primary); animation: pipeFlow 0.4s linear infinite; }
+        @keyframes pipeFlow { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .tank-drain { position: absolute; bottom: 8px; display: flex; flex-direction: column; align-items: center; z-index: 4; }
+        .tank-drain-body { width: 24px; height: 24px; background: var(--bg-cell); border: 2px solid #556; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+        .tank-drain.active .tank-drain-body { border-color: var(--warning); background: rgba(234,179,8,0.08); }
+        .tank-drain-arrow { font-size: 0.7rem; color: #556; }
+        .tank-drain.active .tank-drain-arrow { color: var(--warning); }
+        .tank-drain-label { font-size: 0.4rem; color: var(--text-muted); text-align: center; line-height: 1.1; margin-top: 2px; }
+        .tank-drain.active .tank-drain-label { color: var(--warning); }
+        .tank-pipe-down { position: absolute; width: 4px; background: #475569; border-radius: 1px; }
+        .tank-pipe-down.active { background: var(--warning); box-shadow: 0 0 5px var(--warning); animation: pipeFlow 0.4s linear infinite; }
+        .tank-lights { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 4px; }
+        .tank-light { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #333; }
+        .tank-light.green { background: #1a3a1a; }
+        .tank-light.green.active { background: var(--success); box-shadow: 0 0 8px var(--success); }
+        .tank-light.red { background: #3a1a1a; }
+        .tank-light.red.active { background: var(--error); box-shadow: 0 0 8px var(--error); }
+        .tank-buttons { position: absolute; top: 6px; left: 6px; display: flex; gap: 4px; z-index: 5; }
+        .tank-io-btn { width: 36px; height: 36px; border: 2px solid var(--primary); border-radius: 6px; background: var(--bg-cell); color: var(--primary); font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; font-weight: 700; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; transition: all 0.1s; }
+        .tank-io-btn:hover { background: rgba(0,102,204,0.15); }
+        .tank-io-btn.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 0 8px rgba(0,102,204,0.4); }
+        .tank-io-btn.stop { border-color: var(--error); color: var(--error); }
+        .tank-io-btn.stop:hover { background: rgba(239,68,68,0.15); }
+        .tank-io-btn.stop.active { background: var(--error); color: white; box-shadow: 0 0 8px rgba(239,68,68,0.4); }
+        .tank-io-sub { font-size: 0.35rem; font-weight: 400; opacity: 0.7; }
+        /* Tank switch box */
+        .tank-switch-box { position: absolute; top: 6px; left: 6px; background: #1a1a2e; border: 1.5px solid #444; border-radius: 5px; padding: 4px 5px; display: flex; flex-direction: column; align-items: center; gap: 3px; z-index: 5; }
+        .tank-switch-box-label { font-size: 0.35rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; text-transform: uppercase; }
+        .tank-push-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #555; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.1s; }
+        .tank-push-btn.green { background: #1a3a1a; }
+        .tank-push-btn.red { background: #3a1a1a; }
+        .tank-push-btn.green.active { background: var(--success); box-shadow: 0 0 8px var(--success); border-color: var(--success); }
+        .tank-push-btn.red.active { background: var(--error); box-shadow: 0 0 8px var(--error); border-color: var(--error); }
+        .tank-push-btn span { font-size: 0.3rem; color: rgba(255,255,255,0.5); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .tank-push-btn.active span { color: white; }
+        /* Potentiometer */
+        .tank-pot { position: absolute; top: 105px; right: 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; z-index: 5; }
+        .tank-pot-label { font-size: 0.35rem; color: #f97316; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        .tank-pot-body { width: 44px; height: 44px; border-radius: 50%; background: #1a1a2e; border: 2px solid #f97316; position: relative; cursor: pointer; }
+        .tank-pot-track { position: absolute; top: 3px; left: 3px; right: 3px; bottom: 3px; border-radius: 50%; border: 2px dashed rgba(249,115,22,0.2); }
+        .tank-pot-needle { position: absolute; top: 50%; left: 50%; width: 2px; height: 18px; background: #f97316; transform-origin: 50% 0%; transform: rotate(60deg); border-radius: 1px; box-shadow: 0 0 4px rgba(249,115,22,0.5); }
+        .tank-pot-center { position: absolute; top: 50%; left: 50%; width: 6px; height: 6px; background: #f97316; border-radius: 50%; transform: translate(-50%,-50%); }
+        .tank-pot-value { font-size: 0.5rem; color: #f97316; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+        /* Setpoint lína á tanki */
+        .tank-setpoint-line { position: absolute; left: calc(50% + 10px - 50px); width: 100px; height: 0; border-top: 2px dashed #f97316; z-index: 2; pointer-events: none; transition: top 0.15s; display: none; }
+        .tank-setpoint-line.visible { display: block; }
+        .tank-setpoint-label { position: absolute; right: -22px; top: -7px; font-size: 0.4rem; color: #f97316; font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+        .tank-ia-display { position: absolute; bottom: 6px; left: 50%; transform: translateX(-50%); background: var(--bg-cell); border: 1px solid #f97316; border-radius: 4px; padding: 2px 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.6rem; color: #f97316; font-weight: 600; z-index: 5; }
+        .tank-sensor { position: absolute; left: -70px; display: flex; align-items: center; gap: 3px; z-index: 4; }
+        .tank-sensor-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a2a3a; border: 1.5px solid #334; transition: all 0.15s; }
+        .tank-sensor.active .tank-sensor-dot { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 8px rgba(59,130,246,0.7); }
+        .tank-sensor-label { font-family: 'JetBrains Mono', monospace; font-size: 0.35rem; color: var(--text-muted); white-space: nowrap; }
+        .tank-sensor.active .tank-sensor-label { color: var(--primary); }
+        .tank-elbow-drain { }
+        .file-input { display: none; }
+        .btn-file { position: relative; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>⚡ LADDER Builder</h1>
+        <div class="header-controls">
+            <div class="running-indicator" id="running-indicator">🔄 Keyrir</div>
+            <button class="btn btn-success" onclick="toggleSimulation()" id="run-btn">▶️ Keyra</button>
+            <button class="btn btn-secondary" onclick="clearAll()">🗑️</button>
+            <button class="btn btn-secondary" onclick="addNetwork()">➕</button>
+            <button class="btn btn-secondary" onclick="exportLadder()" title="Vista LADDER">💾</button>
+            <label class="btn btn-secondary btn-file" title="Hlaða LADDER">
+                📂
+                <input type="file" class="file-input" accept=".txt,.json,.ladder" onchange="importLadder(event)">
+            </label>
+            <button class="btn btn-secondary" onclick="toggleHelp()" title="Hjálp">❓</button>
+            <button class="btn btn-secondary" onclick="toggleLanguage()" id="lang-btn">
+                <svg id="flag-icon" class="flag-icon" viewBox="0 0 20 14"></svg>
+                <span id="lang-text">EN</span>
+            </button>
+        </div>
+    </header>
+    <!-- Help Modal -->
+    <div class="help-modal" id="help-modal" style="display:none;">
+        <div class="help-modal-content">
+            <div class="help-modal-header">
+                <h2 id="help-title">📖 Leiðbeiningar</h2>
+                <button class="help-close" onclick="toggleHelp()">✕</button>
+            </div>
+            <div class="help-modal-body" id="help-body">
+                <h3>Flýtileiðir</h3>
+                <ul>
+                    <li><kbd>i1</kbd>-<kbd>i8</kbd> - Bæta við input snertum</li>
+                    <li><kbd>M1</kbd>-<kbd>M16</kbd> - Bæta við marker (snerta eða spóla)</li>
+                    <li><kbd>Q1</kbd>-<kbd>Q4</kbd> - Bæta við output spólu</li>
+                    <li><kbd>T1</kbd>-<kbd>T8</kbd> - Bæta við tíma</li>
+                    <li><kbd>N</kbd> - Nýtt network</li>
+                    <li><kbd>←→↑↓</kbd> - Færa cursor</li>
+                    <li><kbd>Space</kbd> - Skipta um tegund (NO↔NC, Coil↔SET↔RST)</li>
+                    <li><kbd>+</kbd> - Bæta við parallel branch</li>
+                    <li><kbd>Delete</kbd> - Eyða íhlut</li>
+                </ul>
+                <h3>Drag & Drop</h3>
+                <p>Dragðu íhluti úr vinstri valmynd inn á LADDER.</p>
+                <h3>Hermir</h3>
+                <p>Notaðu herminn hægra megin til að prófa LADDER rökfræðina. Smelltu á ▶️ Keyra til að byrja.</p>
+            </div>
+        </div>
+    </div>
+    <div class="main-container">
+        <aside class="toolbox">
+            <div class="tool-section" id="section-contacts">
+                <h3 id="header-contacts">Snertur</h3>
+                <div class="tool-item" draggable="true" data-type="contact-make"><span class="tool-symbol" style="color:var(--success)">] [</span><span>NO</span></div>
+                <div class="tool-item" draggable="true" data-type="contact-break"><span class="tool-symbol" style="color:var(--error)">]/[</span><span>NC</span></div>
+            </div>
+            <div class="tool-section" id="section-coils">
+                <h3 class="coils-header" id="header-coils">Spólur</h3>
+                <div class="tool-item" draggable="true" data-type="coil-normal"><span class="tool-symbol" style="color:var(--warning)">( )</span><span>Coil</span></div>
+                <div class="tool-item" draggable="true" data-type="coil-set"><span class="tool-symbol" style="color:var(--success)">(S)</span><span>SET</span></div>
+                <div class="tool-item" draggable="true" data-type="coil-reset"><span class="tool-symbol" style="color:var(--error)">(R)</span><span>Reset</span></div>
+            </div>
+            <div class="tool-section" id="section-timers">
+                <h3 id="header-timers">Tímaliðar</h3>
+                <div class="tool-item" draggable="true" data-type="timer-ton"><span class="tool-symbol" style="color:var(--cyan)">T</span><span>Timer</span></div>
+            </div>
+            <div class="tool-section" id="section-counters">
+                <h3 id="header-counters">Teljarar</h3>
+                <div class="tool-item" draggable="true" data-type="counter"><span class="tool-symbol" style="color:var(--purple)">CNT</span></div>
+            </div>
+            <div class="tool-section" id="section-analog">
+                <h3 id="header-analog" style="background:rgba(249,115,22,0.15);color:#f97316">Analog</h3>
+                <div class="tool-item" draggable="true" data-type="compare"><span class="tool-symbol" style="color:#f97316">CMP</span><span>Compare</span></div>
+            </div>
+            <div class="toolbox-footer">
+                <img src="images/foa-logo.png" alt="Logo" class="toolbox-logo" onerror="this.style.display='none'">
+                <div class="toolbox-info">
+                    <span class="toolbox-author">Friðrik Óli Atlason</span>
+                    <span class="toolbox-org">Rafdeild VMA</span>
+                </div>
+            </div>
+        </aside>
+        <div class="canvas-area">
+            <div class="io-panel">
+                <div class="io-group"><span class="io-group-label">In:</span>
+                    <button class="io-btn input-btn" data-input="i1" onclick="toggleInput(this)">i1</button>
+                    <button class="io-btn input-btn" data-input="i2" onclick="toggleInput(this)">i2</button>
+                    <button class="io-btn input-btn" data-input="i3" onclick="toggleInput(this)">i3</button>
+                    <button class="io-btn input-btn" data-input="i4" onclick="toggleInput(this)">i4</button>
+                    <button class="io-btn input-btn" data-input="i5" onclick="toggleInput(this)">i5</button>
+                    <button class="io-btn input-btn" data-input="i6" onclick="toggleInput(this)">i6</button>
+                    <button class="io-btn input-btn" data-input="i7" onclick="toggleInput(this)">i7</button>
+                    <button class="io-btn input-btn" data-input="i8" onclick="toggleInput(this)">i8</button>
+                    <button class="io-btn input-btn" data-input="i9" onclick="toggleInput(this)">i9</button>
+                    <button class="io-btn input-btn" data-input="i10" onclick="toggleInput(this)">10</button>
+                    <button class="io-btn input-btn" data-input="i11" onclick="toggleInput(this)">11</button>
+                    <button class="io-btn input-btn" data-input="i12" onclick="toggleInput(this)">12</button>
+                    <button class="io-btn input-btn" data-input="i13" onclick="toggleInput(this)">13</button>
+                    <button class="io-btn input-btn" data-input="i14" onclick="toggleInput(this)">14</button>
+                    <button class="io-btn input-btn" data-input="i15" onclick="toggleInput(this)">15</button>
+                    <button class="io-btn input-btn" data-input="i16" onclick="toggleInput(this)">16</button>
+                </div>
+                <div class="io-group"><span class="io-group-label">M:</span>
+                    <button class="io-btn marker-btn" id="marker-M1">M1</button>
+                    <button class="io-btn marker-btn" id="marker-M2">M2</button>
+                    <button class="io-btn marker-btn" id="marker-M3">M3</button>
+                    <button class="io-btn marker-btn" id="marker-M4">M4</button>
+                    <button class="io-btn marker-btn" id="marker-M5">M5</button>
+                    <button class="io-btn marker-btn" id="marker-M6">M6</button>
+                    <button class="io-btn marker-btn" id="marker-M7">M7</button>
+                    <button class="io-btn marker-btn" id="marker-M8">M8</button>
+                    <button class="io-btn marker-btn" id="marker-M9">M9</button>
+                    <button class="io-btn marker-btn" id="marker-M10">10</button>
+                    <button class="io-btn marker-btn" id="marker-M11">11</button>
+                    <button class="io-btn marker-btn" id="marker-M12">12</button>
+                    <button class="io-btn marker-btn" id="marker-M13">13</button>
+                    <button class="io-btn marker-btn" id="marker-M14">14</button>
+                    <button class="io-btn marker-btn" id="marker-M15">15</button>
+                    <button class="io-btn marker-btn" id="marker-M16">16</button>
+                </div>
+                <div class="io-group"><span class="io-group-label">Q:</span>
+                    <button class="io-btn output-btn" id="output-Q1">Q1</button>
+                    <button class="io-btn output-btn" id="output-Q2">Q2</button>
+                    <button class="io-btn output-btn" id="output-Q3">Q3</button>
+                    <button class="io-btn output-btn" id="output-Q4">Q4</button>
+                    <button class="io-btn output-btn" id="output-Q5">Q5</button>
+                    <button class="io-btn output-btn" id="output-Q6">Q6</button>
+                    <button class="io-btn output-btn" id="output-Q7">Q7</button>
+                    <button class="io-btn output-btn" id="output-Q8">Q8</button>
+                    <button class="io-btn output-btn" id="output-Q9">Q9</button>
+                    <button class="io-btn output-btn" id="output-Q10">10</button>
+                    <button class="io-btn output-btn" id="output-Q11">11</button>
+                    <button class="io-btn output-btn" id="output-Q12">12</button>
+                </div>
+                <div class="io-group analog-group"><span class="io-group-label" style="color:#f97316">IA:</span>
+                    <div class="analog-slider-wrapper" onclick="selectAnalogInput('IA1')"><span class="analog-label" id="ia-label-IA1">IA1</span><input type="range" class="analog-slider" id="analog-IA1" min="0" max="1000" value="0" oninput="updateAnalog('IA1',this.value)"><span class="analog-val" id="analog-val-IA1">0</span></div>
+                    <div class="analog-slider-wrapper" onclick="selectAnalogInput('IA2')"><span class="analog-label" id="ia-label-IA2">IA2</span><input type="range" class="analog-slider" id="analog-IA2" min="0" max="1000" value="0" oninput="updateAnalog('IA2',this.value)"><span class="analog-val" id="analog-val-IA2">0</span></div>
+                    <div class="analog-slider-wrapper" onclick="selectAnalogInput('IA3')"><span class="analog-label" id="ia-label-IA3">IA3</span><input type="range" class="analog-slider" id="analog-IA3" min="0" max="1000" value="0" oninput="updateAnalog('IA3',this.value)"><span class="analog-val" id="analog-val-IA3">0</span></div>
+                    <div class="analog-slider-wrapper" onclick="selectAnalogInput('IA4')"><span class="analog-label" id="ia-label-IA4">IA4</span><input type="range" class="analog-slider" id="analog-IA4" min="0" max="1000" value="0" oninput="updateAnalog('IA4',this.value)"><span class="analog-val" id="analog-val-IA4">0</span></div>
+                </div>
+            </div>
+            <div class="ladder-container"><div class="ladder-grid" id="ladder-grid"></div></div>
+            <div class="help-panel">
+                <div class="help-items">
+                    <span><kbd>i1</kbd><kbd>M2</kbd><kbd>Q1</kbd> Ný snerta/spóla</span>
+                    <span><kbd>N</kbd> Network</span>
+                    <span><kbd>←→↑↓</kbd> Færa</span>
+                    <span><kbd>Space</kbd> Tegund</span>
+                    <span><kbd>+</kbd> Parallel</span>
+                    <span><kbd>U</kbd>/<kbd>D</kbd> Timer PT</span>
+                    <span><kbd>A1</kbd> Analog CMP</span>
+                </div>
+            </div>
+        </div>
+        <aside class="sim-sidebar">
+            <!-- EIGINLEIKAR - alltaf sýnilegt efst -->
+            <div class="props-section">
+                <div class="props-section-header" id="props-header">🔧 Eiginleikar</div>
+                <div class="props-section-body" id="props-content">
+                    <div class="prop-empty">
+                        <div class="prop-empty-icon">🔧</div>
+                        <span id="props-empty-text">Veldu íhlut til að sjá eiginleika</span>
+                    </div>
+                </div>
+            </div>
+            <!-- HERMIR - alltaf sýnilegt neðst -->
+            <div class="sim-section">
+                <div class="sim-section-header" id="sim-header">🏭 Hermir</div>
+                <div class="sim-tabs">
+                    <button class="sim-tab active" onclick="showSimTab('conveyor')" id="tab-conveyor">Færiband</button>
+                    <button class="sim-tab" onclick="showSimTab('traffic')" id="tab-traffic">Ljós</button>
+                    <button class="sim-tab" onclick="showSimTab('tank')" id="tab-tank">Tank</button>
+                </div>
+                <div class="sim-content">
+                <div class="sim-panel active" id="sim-conveyor">
+                    <div class="task-info">
+                        <h4 id="task-title-conv">📋 Verkefni: Færiband</h4>
+                        <p id="task-desc-conv">Forritaðu LADDER til að stjórna færibandinu.</p>
+                        <div class="task-io" style="display:grid;grid-template-columns:1fr 1fr;gap:0.15rem 0.5rem">
+                            <div class="task-io-item"><span class="io-label input">i1</span> S1 Start (NO)</div>
+                            <div class="task-io-item"><span class="io-label output">Q1</span> Mótor áfram</div>
+                            <div class="task-io-item"><span class="io-label input">i2</span> S2 Stop (NC)</div>
+                            <div class="task-io-item"><span class="io-label output">Q2</span> Mótor aftur</div>
+                            <div class="task-io-item"><span class="io-label input">i3</span> B1 Skynjari (auto)</div>
+                            <div class="task-io-item"><span class="io-label output">Q3</span> R - Rautt</div>
+                            <div class="task-io-item"><span class="io-label input">i4</span> B2 Skynjari (auto)</div>
+                            <div class="task-io-item"><span class="io-label output">Q4</span> Y - Gult</div>
+                            <div class="task-io-item"><span class="io-label input">i5</span> B3 Skynjari (auto)</div>
+                            <div class="task-io-item"><span class="io-label output">Q5</span> G - Grænt</div>
+                        </div>
+                    </div>
+                    <div class="sim-canvas" id="conveyor-canvas" style="height:220px">
+                        <!-- Start/Stop rofar - push buttons -->
+                        <div class="conv-buttons">
+                            <button class="conv-start-btn" id="conv-btn-s1" onmousedown="convPushInput('i1',true)" onmouseup="convPushInput('i1',false)" onmouseleave="convPushInput('i1',false)" ontouchstart="convPushInput('i1',true)" ontouchend="convPushInput('i1',false)"><div class="conv-btn-circle green"></div><span>S1</span></button>
+                            <button class="conv-stop-btn" id="conv-btn-s2" onmousedown="convPushInput('i2',true)" onmouseup="convPushInput('i2',false)" onmouseleave="convPushInput('i2',false)" ontouchstart="convPushInput('i2',true)" ontouchend="convPushInput('i2',false)"><div class="conv-btn-circle red"></div><span>S2</span></button>
+                        </div>
+                        <!-- Turn ljós R/Y/G -->
+                        <div class="conv-turn-lights">
+                            <div class="conv-turn-light" id="conv-light-r" style="background:#3a1a1a"><span>R</span></div>
+                            <div class="conv-turn-light" id="conv-light-y" style="background:#3a3a1a"><span>Y</span></div>
+                            <div class="conv-turn-light" id="conv-light-g" style="background:#1a3a1a"><span>G</span></div>
+                        </div>
+                        <!-- Færiband -->
+                        <div class="conveyor">
+                            <div class="conveyor-belt" id="conveyor-belt"></div>
+                            <div class="conveyor-leg left"></div>
+                            <div class="conveyor-leg right"></div>
+                        </div>
+                        <!-- Motor status undir færibandi -->
+                        <div class="conv-motor-under">
+                            <div class="status-item" id="motor-rev">◀ Aftur</div>
+                            <div class="status-item" id="motor-fwd">Áfram ▶</div>
+                        </div>
+                        <!-- Skynjarar B1/B2/B3 -->
+                        <div class="sensor" style="left:15px;" id="sensor1">
+                            <div class="sensor-label">B1</div>
+                            <div class="sensor-head" id="sensor1-head"></div>
+                            <div class="sensor-post"></div>
+                            <div class="sensor-beam" id="sensor1-beam"></div>
+                        </div>
+                        <div class="sensor" style="left:120px;" id="sensor2">
+                            <div class="sensor-label">B2</div>
+                            <div class="sensor-head" id="sensor2-head"></div>
+                            <div class="sensor-post"></div>
+                            <div class="sensor-beam" id="sensor2-beam"></div>
+                        </div>
+                        <div class="sensor" style="left:235px;" id="sensor3">
+                            <div class="sensor-label">B3</div>
+                            <div class="sensor-head" id="sensor3-head"></div>
+                            <div class="sensor-post"></div>
+                            <div class="sensor-beam" id="sensor3-beam"></div>
+                        </div>
+                    </div>
+                    <div class="sim-controls">
+                        <button class="sim-btn" onclick="spawnBox()" id="btn-box">📦 Kassi</button>
+                        <button class="sim-btn" onclick="resetConveyor()">🔄 Reset</button>
+                    </div>
+                </div>
+                <div class="sim-panel" id="sim-traffic">
+                    <div class="task-info">
+                        <h4>📋 Verkefni: Umferðarljós</h4>
+                        <p>Forritaðu umferðarljós með tímastýringu.</p>
+                        <div class="task-io">
+                            <div class="task-io-item"><span class="io-label input">i1</span> Start</div>
+                            <div class="task-io-item"><span class="io-label output">Q1</span> Rautt</div>
+                            <div class="task-io-item"><span class="io-label output">Q2</span> Gult</div>
+                            <div class="task-io-item"><span class="io-label output">Q3</span> Grænt</div>
+                        </div>
+                    </div>
+                    <div class="sim-canvas" style="display:flex;align-items:center;justify-content:center;">
+                        <div style="background:#222;padding:12px;border-radius:8px;border:3px solid #444;">
+                            <div id="tl-red" style="width:40px;height:40px;border-radius:50%;background:#3a1a1a;margin-bottom:8px;border:2px solid #333;"></div>
+                            <div id="tl-yellow" style="width:40px;height:40px;border-radius:50%;background:#3a3a1a;margin-bottom:8px;border:2px solid #333;"></div>
+                            <div id="tl-green" style="width:40px;height:40px;border-radius:50%;background:#1a3a1a;border:2px solid #333;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sim-panel" id="sim-tank">
+                    <div class="task-info">
+                        <h4 id="task-title-tank">📋 Verkefni: Fyllingarstöð</h4>
+                        <p id="task-desc-tank">Stýrðu vatnsstigi. Skynjarar nema stig sjálfkrafa. IA2 er stilliviðnám.</p>
+                        <div class="task-io" style="display:grid;grid-template-columns:1fr 1fr;gap:0.15rem 0.5rem">
+                            <div class="task-io-item"><span class="io-label input">i1</span> S1 Start</div>
+                            <div class="task-io-item"><span class="io-label output">Q1</span> Pumpa 1</div>
+                            <div class="task-io-item"><span class="io-label input">i2</span> S2 Stop</div>
+                            <div class="task-io-item"><span class="io-label output">Q2</span> Pumpa 2</div>
+                            <div class="task-io-item"><span class="io-label input">i3</span> HiHi (950)</div>
+                            <div class="task-io-item"><span class="io-label output">Q3</span> Drain</div>
+                            <div class="task-io-item"><span class="io-label input">i4</span> Hi (700)</div>
+                            <div class="task-io-item"><span class="io-label output">Q4</span> R - Rautt</div>
+                            <div class="task-io-item"><span class="io-label input">i5</span> Lo (200)</div>
+                            <div class="task-io-item"><span class="io-label output">Q5</span> Y - Gult</div>
+                            <div class="task-io-item"><span class="io-label input">i6</span> LoLo (100)</div>
+                            <div class="task-io-item"><span class="io-label output">Q6</span> G - Grænt</div>
+                            <div class="task-io-item"><span class="io-label" style="background:#f97316;color:white;font-size:0.38rem">IA1</span> Stig (auto)</div>
+                            <div class="task-io-item"><span class="io-label" style="background:#f97316;color:white;font-size:0.38rem">IA2</span> Setpoint</div>
+                        </div>
+                    </div>
+                    <div class="sim-canvas tank-tall" id="tank-canvas">
+                        <div class="tank-container">
+                            <!-- Rofa box -->
+                            <div class="tank-switch-box">
+                                <div class="tank-switch-box-label">Rofar</div>
+                                <button class="tank-push-btn green" id="tank-btn-i1" onmousedown="tankPushInput('i1',true)" onmouseup="tankPushInput('i1',false)" onmouseleave="tankPushInput('i1',false)" ontouchstart="tankPushInput('i1',true)" ontouchend="tankPushInput('i1',false)"><span>S1</span></button>
+                                <button class="tank-push-btn red" id="tank-btn-i2" onmousedown="tankPushInput('i2',true)" onmouseup="tankPushInput('i2',false)" onmouseleave="tankPushInput('i2',false)" ontouchstart="tankPushInput('i2',true)" ontouchend="tankPushInput('i2',false)"><span>S2</span></button>
+                            </div>
+                            <!-- Turn ljós R/Y/G -->
+                            <div class="conv-turn-lights" style="top:6px;right:8px">
+                                <div class="conv-turn-light" id="tank-turn-r" style="background:#3a1a1a"><span>R</span></div>
+                                <div class="conv-turn-light" id="tank-turn-y" style="background:#3a3a1a"><span>Y</span></div>
+                                <div class="conv-turn-light" id="tank-turn-g" style="background:#1a3a1a"><span>G</span></div>
+                            </div>
+                            <!-- Pumpa 1 -->
+                            <div class="tank-pump" id="tank-pump1-indicator" style="left:10px; top:180px">
+                                <div class="tank-pipe-up" id="tank-pipe-in1" style="height:25px; bottom:34px; left:13px"></div>
+                                <div class="tank-pipe-elbow" id="tank-elbow1" style="bottom:59px; left:13px; transform:rotate(270deg)"></div>
+                                <div class="tank-pipe-horiz" id="tank-pipe-h1" style="bottom:65px; left:23px; width:71px"></div>
+                                <div class="tank-pump-body"><div class="tank-pump-impeller"></div></div>
+                                <div class="tank-pump-label">P1·Q1</div>
+                            </div>
+                            <!-- Pumpa 2 -->
+                            <div class="tank-pump" id="tank-pump2-indicator" style="left:50px; top:180px">
+                                <div class="tank-pipe-up" id="tank-pipe-in2" style="height:25px; bottom:34px; left:13px"></div>
+                                <div class="tank-pipe-elbow" id="tank-elbow2" style="bottom:54px; left:13px; transform:rotate(270deg)"></div>
+                                <div class="tank-pipe-horiz" id="tank-pipe-h2" style="bottom:60px; left:23px; width:37px"></div>
+                                <div class="tank-pump-body"><div class="tank-pump-impeller"></div></div>
+                                <div class="tank-pump-label">P2·Q2</div>
+                            </div>
+                            <!-- Tank -->
+                            <div class="tank-body" style="left:calc(50% + 10px)">
+                                <div class="tank-water" id="tank-water"></div>
+                                <div class="tank-level-marks">
+                                    <div class="tank-mark" style="bottom:95%"><span>950</span></div>
+                                    <div class="tank-mark" style="bottom:70%"><span>700</span></div>
+                                    <div class="tank-mark" style="bottom:50%"><span>500</span></div>
+                                    <div class="tank-mark" style="bottom:20%"><span>200</span></div>
+                                    <div class="tank-mark" style="bottom:10%"><span>100</span></div>
+                                </div>
+                                <div class="tank-sensor" id="tank-s-hihi" style="top:5%"><span class="tank-sensor-dot"></span><span class="tank-sensor-label">i3 HiHi</span></div>
+                                <div class="tank-sensor" id="tank-s-hi" style="top:30%"><span class="tank-sensor-dot"></span><span class="tank-sensor-label">i4 Hi</span></div>
+                                <div class="tank-sensor" id="tank-s-lo" style="top:80%"><span class="tank-sensor-dot"></span><span class="tank-sensor-label">i5 Lo</span></div>
+                                <div class="tank-sensor" id="tank-s-lolo" style="top:90%"><span class="tank-sensor-dot"></span><span class="tank-sensor-label">i6 LoLo</span></div>
+                                <div class="tank-level-text" id="tank-level-text">0</div>
+                            </div>
+                            <!-- Drain beint undir tank -->
+                            <div class="tank-drain" id="tank-drain-indicator" style="left:calc(50% + 50px); top:192px; transform:translateX(-50%)">
+                                <div class="tank-drain-body"><span class="tank-drain-arrow">▼</span></div>
+                                <div class="tank-drain-label">Drain·Q3</div>
+                            </div>
+                            <!-- IA displays -->
+                            <div class="tank-ia-display" style="top:195px; left:calc(50% - 10px); transform:translateX(-50%); bottom:auto">IA1: <span id="tank-ia-value">0</span></div>
+                            <!-- Setpoint lína á tanki -->
+                            <div class="tank-setpoint-line" id="tank-setpoint-line" style="top:calc(10px + 180px * (1 - 0))">
+                                <span class="tank-setpoint-label">SP</span>
+                            </div>
+                            <!-- Potentiometer IA2 -->
+                            <div class="tank-pot" id="tank-pot">
+                                <div class="tank-pot-label">IA2 Setpoint</div>
+                                <div class="tank-pot-body" id="tank-pot-body">
+                                    <div class="tank-pot-track"></div>
+                                    <div class="tank-pot-needle" id="tank-pot-needle"></div>
+                                    <div class="tank-pot-center"></div>
+                                </div>
+                                <div class="tank-pot-value" id="tank-pot-value">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sim-controls">
+                        <button class="sim-btn" onclick="resetTank()">🔄 Reset</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <div class="delete-zone" id="delete-zone">🗑️</div>
+<script>
+let networks = [], selectedComponent = null, selectedInfo = null, isRunning = false, simulationInterval = null;
+let cursorInfo = null; // {network, cell, row} - sýnir hvar keyboard cursor er
+let selectedAnalog = null; // 'IA1'-'IA4' eða null
+const inputState = {}; for(let i=1;i<=16;i++) inputState['i'+i]=false;
+const outputState = {}; for(let i=1;i<=12;i++) outputState['Q'+i]=false;
+const markerState = {};
+for(let i=1;i<=16;i++)markerState['M'+i]=false;
+const timerState = {};
+// Búa til T1-T8 timers
+// mode: 'ton','tof','pulse','flash'
+// timeFormat: 's','mmss','hhmm'
+for(let i=1;i<=8;i++){timerState['T'+i]={elapsed:0,output:false,preset:2000,mode:'ton',timeFormat:'s',flashState:false,lastInput:false};}
+
+// Fall til að fá timer state (býr til ef ekki til)
+function getTimerState(io){
+    if(!timerState[io]){timerState[io]={elapsed:0,output:false,preset:2000,mode:'ton',timeFormat:'s',flashState:false,lastInput:false};}
+    // Migration
+    if(!timerState[io].mode) timerState[io].mode='ton';
+    if(!timerState[io].timeFormat) timerState[io].timeFormat='s';
+    return timerState[io];
+}
+
+// Format tíma eftir timeFormat
+function formatTime(ms, fmt){
+    if(fmt === 'mmss'){
+        const totalSec = Math.floor(ms/1000);
+        const m = Math.floor(totalSec/60);
+        const s = totalSec % 60;
+        return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    } else if(fmt === 'hhmm'){
+        const totalMin = Math.floor(ms/60000);
+        const h = Math.floor(totalMin/60);
+        const m = totalMin % 60;
+        return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+    }
+    return (ms/1000).toFixed(1) + 's';
+}
+
+// Fá max preset eftir format
+function getMaxPreset(fmt){
+    if(fmt === 'mmss') return 5999000; // 99:59
+    if(fmt === 'hhmm') return 86340000; // 23:59 í ms
+    return 30000; // 30s
+}
+
+// Fá step eftir format
+function getPresetStep(fmt){
+    if(fmt === 'mmss') return 1000; // 1 sek
+    if(fmt === 'hhmm') return 60000; // 1 mín
+    return 500; // 0.5s
+}
+
+// Counter state
+const counterState = {};
+for(let i=1;i<=8;i++){counterState['C'+i]={cv:0,output:false,preset:10,lastC:false};}
+
+// Fall til að fá counter state
+function getCounterState(io){
+    if(!counterState[io]){counterState[io]={cv:0,output:false,preset:10,lastC:false};}
+    return counterState[io];
+}
+
+// Analog state - IA1-IA4 (0-1000, táknar 0-10V)
+const analogState = {IA1:0, IA2:0, IA3:0, IA4:0};
+
+// Compare state - CMP1-CMP8
+// input: fyrsta analog input, input2Type: 'analog' eða 'const', input2: IA nafn eða fast gildi
+const compareState = {};
+for(let i=1;i<=8;i++){compareState['A'+i]={input:'IA1',op:'>=',input2Type:'const',input2:'IA2',threshold:500,output:false};}
+
+function getCompareState(io){
+    if(!compareState[io]){compareState[io]={input:'IA1',op:'>=',input2Type:'const',input2:'IA2',threshold:500,output:false};}
+    // Migration: ef gamalt format án input2Type
+    if(!compareState[io].input2Type){ compareState[io].input2Type='const'; compareState[io].input2='IA2'; }
+    return compareState[io];
+}
+
+// Fá samanburðargildi 2 (annað hvort analog eða fasti)
+function getCompareVal2(cps){
+    if(cps.input2Type === 'analog') return analogState[cps.input2] || 0;
+    return cps.threshold;
+}
+
+function updateAnalog(ia, val){
+    analogState[ia] = parseInt(val);
+    document.getElementById('analog-val-'+ia).textContent = val;
+    // Uppfæra props ef þetta IA er valið
+    if(selectedAnalog === ia) updatePropsPanel();
+}
+
+function selectAnalogInput(ia){
+    // Deselect ladder component
+    selectedComponent = null;
+    selectedInfo = null;
+    document.querySelectorAll('.cell-component').forEach(c=>c.classList.remove('selected'));
+    // Select analog - alltaf sýna alla 4
+    selectedAnalog = 'ALL';
+    document.querySelectorAll('.analog-slider-wrapper').forEach(w=>w.classList.add('selected'));
+    // Sýna props tab og uppfæra
+    
+    updatePropsPanel();
+}
+
+const latchedOutputs = {}; for(let i=1;i<=12;i++) latchedOutputs['Q'+i]=false;
+const latchedMarkers = {};
+for(let i=1;i<=16;i++)latchedMarkers['M'+i]=false;
+const CELL_W = 92;
+let boxes = [], boxIdCounter = 0, activeSimTab = 'conveyor';
+let currentLang = 'is';
+
+const translations = {
+    is: {
+        title: '⚡ LADDER Builder',
+        run: '▶️ Keyra',
+        stop: '⏹️ Stop',
+        running: '🔄 Keyrir',
+        helpTitle: '📖 Leiðbeiningar',
+        shortcuts: 'Flýtileiðir',
+        shortcutsList: [
+            '<kbd>i1</kbd>-<kbd>i8</kbd> - Bæta við input snertum',
+            '<kbd>M1</kbd>-<kbd>M16</kbd> - Bæta við marker (snerta eða spóla)',
+            '<kbd>Q1</kbd>-<kbd>Q4</kbd> - Bæta við output spólu',
+            '<kbd>T1</kbd>-<kbd>T8</kbd> - Bæta við tíma',
+            '<kbd>A1</kbd>-<kbd>A8</kbd> - Bæta við analog compare',
+            '<kbd>N</kbd> - Nýtt network',
+            '<kbd>←→↑↓</kbd> - Færa cursor',
+            '<kbd>Space</kbd> - Skipta um tegund (NO↔NC, Coil↔SET↔Reset, TON↔TOF)',
+            '<kbd>U</kbd>/<kbd>D</kbd> - Hækka/lækka timer PT (±0.5s)',
+            '<kbd>+</kbd> - Bæta við parallel branch',
+            '<kbd>Delete</kbd> - Eyða íhlut'
+        ],
+        dragDrop: 'Drag & Drop',
+        dragDropDesc: 'Dragðu íhluti úr vinstri valmynd inn á LADDER.',
+        simulator: 'Hermir',
+        simulatorDesc: 'Notaðu herminn hægra megin til að prófa LADDER rökfræðina. Smelltu á ▶️ Keyra til að byrja.',
+        contacts: 'Snertur',
+        coils: 'Spólur',
+        timers: 'Tímaliðar',
+        counters: 'Teljarar',
+        analog: 'Analog',
+        langBtn: '🇬🇧 EN',
+        // Simulation
+        simHeader: '🏭 Hermir',
+        tabConveyor: 'Færiband',
+        tabTraffic: 'Ljós',
+        tabProps: 'Eiginleikar',
+        tabTank: 'Tank',
+        propsEmpty: 'Veldu íhlut til að sjá eiginleika',
+        propsType: 'Tegund',
+        propsAddress: 'Vistfang',
+        propsSettings: 'Stillingar',
+        propsStatus: 'Staða',
+        propsInput: 'Inntak',
+        propsOperator: 'Samanburður',
+        propsThreshold: 'Þröskuldur',
+        propsPreset: 'Forval',
+        propsCurrent: 'Núverandi',
+        propsOutput: 'Úttak',
+        propsDelete: 'Eyða',
+        propsActive: 'Virkt',
+        propsInactive: 'Óvirkt',
+        taskConveyor: '📋 Verkefni: Færiband',
+        taskConveyorDesc: 'Forritaðu LADDER til að stjórna færibandinu. Skynjarar verða sjálfkrafa háir þegar kassi fer framhjá.',
+        ioStart: 'Start', ioStop: 'Stop',
+        ioS1: 'Skynjari S1 (auto)', ioS2: 'Skynjari S2 (auto)', ioS3: 'Skynjari S3 (auto)',
+        ioFwd: 'Mótor áfram', ioRev: 'Mótor aftur',
+        ioGreen: 'Grænt ljós', ioRed: 'Rautt ljós',
+        statusFwd: 'Áfram', statusRev: 'Aftur',
+        btnBox: '📦 Kassi', btnReset: '🔄 Reset'
+    },
+    en: {
+        title: '⚡ LADDER Builder',
+        run: '▶️ Run',
+        stop: '⏹️ Stop',
+        running: '🔄 Running',
+        helpTitle: '📖 Instructions',
+        shortcuts: 'Shortcuts',
+        shortcutsList: [
+            '<kbd>i1</kbd>-<kbd>i8</kbd> - Add input contacts',
+            '<kbd>M1</kbd>-<kbd>M16</kbd> - Add marker (contact or coil)',
+            '<kbd>Q1</kbd>-<kbd>Q4</kbd> - Add output coil',
+            '<kbd>T1</kbd>-<kbd>T8</kbd> - Add timer',
+            '<kbd>A1</kbd>-<kbd>A8</kbd> - Add analog compare',
+            '<kbd>N</kbd> - New network',
+            '<kbd>←→↑↓</kbd> - Move cursor',
+            '<kbd>Space</kbd> - Toggle type (NO↔NC, Coil↔SET↔Reset, TON↔TOF)',
+            '<kbd>U</kbd>/<kbd>D</kbd> - Increase/decrease timer PT (±0.5s)',
+            '<kbd>+</kbd> - Add parallel branch',
+            '<kbd>Delete</kbd> - Delete component'
+        ],
+        dragDrop: 'Drag & Drop',
+        dragDropDesc: 'Drag components from the left panel onto the LADDER.',
+        simulator: 'Simulator',
+        simulatorDesc: 'Use the simulator on the right to test your LADDER logic. Click ▶️ Run to start.',
+        contacts: 'Contacts',
+        coils: 'Coils',
+        timers: 'Timers',
+        counters: 'Counters',
+        analog: 'Analog',
+        langBtn: '🇮🇸 IS',
+        // Simulation
+        simHeader: '🏭 Simulator',
+        tabConveyor: 'Conveyor',
+        tabTraffic: 'Lights',
+        tabProps: 'Properties',
+        tabTank: 'Tank',
+        propsEmpty: 'Select a component to view properties',
+        propsType: 'Type',
+        propsAddress: 'Address',
+        propsSettings: 'Settings',
+        propsStatus: 'Status',
+        propsInput: 'Input',
+        propsOperator: 'Compare',
+        propsThreshold: 'Threshold',
+        propsPreset: 'Preset',
+        propsCurrent: 'Current',
+        propsOutput: 'Output',
+        propsDelete: 'Delete',
+        propsActive: 'Active',
+        propsInactive: 'Inactive',
+        taskConveyor: '📋 Task: Conveyor',
+        taskConveyorDesc: 'Program the LADDER to control the conveyor. Sensors automatically activate when a box passes by.',
+        ioStart: 'Start', ioStop: 'Stop',
+        ioS1: 'Sensor S1 (auto)', ioS2: 'Sensor S2 (auto)', ioS3: 'Sensor S3 (auto)',
+        ioFwd: 'Motor forward', ioRev: 'Motor reverse',
+        ioGreen: 'Green light', ioRed: 'Red light',
+        statusFwd: 'Forward', statusRev: 'Reverse',
+        btnBox: '📦 Box', btnReset: '🔄 Reset'
+    }
+};
+
+function toggleHelp() {
+    const modal = document.getElementById('help-modal');
+    modal.style.display = modal.style.display === 'none' ? 'flex' : 'none';
+}
+
+function toggleLanguage() {
+    currentLang = currentLang === 'is' ? 'en' : 'is';
+    applyLanguage();
+}
+
+function drawFlag(lang) {
+    const svg = document.getElementById('flag-icon');
+    if (lang === 'is') {
+        // Enska fáninn (skipta YFÍ á ensku)
+        svg.innerHTML = `
+            <rect width="20" height="14" fill="#012169"/>
+            <path d="M0,0 L20,14 M20,0 L0,14" stroke="#fff" stroke-width="2.5"/>
+            <path d="M0,0 L20,14 M20,0 L0,14" stroke="#C8102E" stroke-width="1.5"/>
+            <path d="M10,0 V14 M0,7 H20" stroke="#fff" stroke-width="4"/>
+            <path d="M10,0 V14 M0,7 H20" stroke="#C8102E" stroke-width="2.5"/>
+        `;
+    } else {
+        // Íslenski fáninn (skipta YFÍ á íslensku)
+        svg.innerHTML = `
+            <rect width="20" height="14" fill="#003897"/>
+            <rect x="6" y="0" width="4" height="14" fill="#fff"/>
+            <rect x="0" y="5" width="20" height="4" fill="#fff"/>
+            <rect x="7" y="0" width="2" height="14" fill="#D72828"/>
+            <rect x="0" y="6" width="20" height="2" fill="#D72828"/>
+        `;
+    }
+}
+
+function applyLanguage() {
+    const t = translations[currentLang];
+    // Sýna fána fyrir NÆSTA tungumál (það sem verður ef smellt)
+    drawFlag(currentLang);
+    document.getElementById('lang-text').textContent = currentLang === 'is' ? 'EN' : 'IS';
+    document.getElementById('help-title').textContent = t.helpTitle;
+    
+    // Update help body
+    const helpBody = document.getElementById('help-body');
+    helpBody.innerHTML = `
+        <h3>${t.shortcuts}</h3>
+        <ul>${t.shortcutsList.map(s => '<li>' + s + '</li>').join('')}</ul>
+        <h3>${t.dragDrop}</h3>
+        <p>${t.dragDropDesc}</p>
+        <h3>${t.simulator}</h3>
+        <p>${t.simulatorDesc}</p>
+    `;
+    
+    // Update toolbox headers
+    document.getElementById('header-contacts').textContent = t.contacts;
+    document.getElementById('header-coils').textContent = t.coils;
+    document.getElementById('header-timers').textContent = t.timers;
+    document.getElementById('header-counters').textContent = t.counters;
+    document.getElementById('header-analog').textContent = t.analog;
+    
+    // Update run button if not running
+    if (!isRunning) {
+        document.getElementById('run-btn').innerHTML = t.run;
+    }
+    document.getElementById('running-indicator').textContent = t.running;
+    
+    // Update simulation text
+    document.getElementById('props-header').textContent = currentLang==='is' ? '🔧 Eiginleikar' : '🔧 Properties';
+    document.getElementById('sim-header').textContent = currentLang==='is' ? '🏭 Hermir' : '🏭 Simulator';
+    document.getElementById('tab-conveyor').textContent = t.tabConveyor;
+    document.getElementById('tab-traffic').textContent = t.tabTraffic;
+    document.getElementById('tab-tank').textContent = t.tabTank;
+    document.getElementById('props-empty-text').textContent = t.propsEmpty;
+    document.getElementById('task-title-conv')?.textContent && (document.getElementById('task-title-conv').textContent = t.taskConveyor);
+    document.getElementById('task-desc-conv')?.textContent && (document.getElementById('task-desc-conv').textContent = t.taskConveyorDesc);
+    document.getElementById('status-fwd')?.textContent && (document.getElementById('status-fwd').textContent = t.statusFwd);
+    document.getElementById('status-rev')?.textContent && (document.getElementById('status-rev').textContent = t.statusRev);
+    document.getElementById('btn-box')?.textContent && (document.getElementById('btn-box').textContent = t.btnBox);
+}
+
+function init() { addNetwork(); setupDragAndDrop(); setupKeyboardShortcuts(); cursorInfo={network:0,cell:0,row:'main'}; renderLadder(); applyLanguage(); }
+function showSimTab(tab) {
+    activeSimTab = tab;
+    document.querySelectorAll('.sim-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-'+tab)?.classList.add('active');
+    document.querySelectorAll('.sim-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('sim-'+tab)?.classList.add('active');
+}
+function addNetwork() { networks.push({title:'',mainCells:[null,null,null,null,null,null,null],branches:[],counter:null}); renderLadder(); }
+function deleteNetwork(ni) { if(networks.length===1)return; networks.splice(ni,1); renderLadder(); }
+function renderLadder() {
+    const grid = document.getElementById('ladder-grid');
+    grid.innerHTML = '';
+    networks.forEach((net,ni) => {
+        const netEl = document.createElement('div');
+        netEl.className = 'network' + (net.counter ? ' has-counter' : '');
+        netEl.innerHTML = `<div class="network-header"><span class="network-number">N${ni+1}</span><input type="text" class="network-title" placeholder="Lýsing..." value="${net.title||''}" onchange="networks[${ni}].title=this.value"><button class="network-delete" onclick="deleteNetwork(${ni})" ${networks.length===1?'disabled style="opacity:0.3"':''}>✕</button></div>`;
+        const body = document.createElement('div');
+        body.className = 'network-body';
+        const canvas = document.createElement('div');
+        canvas.className = 'ladder-canvas' + (net.branches?.length?' has-branch':'') + (net.counter?' has-counter':'');
+        const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        svg.id = `svg-${ni}`;
+        canvas.appendChild(svg);
+        const mainRow = document.createElement('div');
+        mainRow.className = 'ladder-row';
+        const railLeft = document.createElement('div');
+        railLeft.className = 'power-rail';
+        railLeft.id = `rail-left-${ni}`;
+        mainRow.appendChild(railLeft);
+        const mainCells = document.createElement('div');
+        mainCells.className = 'ladder-cells';
+        for(let ci=0;ci<7;ci++){
+            const cell = document.createElement('div');
+            const isCursor = cursorInfo && cursorInfo.network===ni && cursorInfo.cell===ci && cursorInfo.row==='main';
+            cell.className = 'ladder-cell'+(ci===6?' output-cell':'')+(isCursor?' cursor':'');
+            cell.dataset.network=ni; cell.dataset.cell=ci; cell.dataset.row='main';
+            cell.addEventListener('click', function(e){ if(!e.target.closest('.cell-component')) moveCursor(ni,ci,'main'); });
+            if(net.mainCells[ci]) cell.appendChild(createComponent(net.mainCells[ci],ni,ci,'main'));
+            mainCells.appendChild(cell);
+        }
+        mainRow.appendChild(mainCells);
+        const railRight = document.createElement('div');
+        railRight.className = 'power-rail';
+        railRight.id = `rail-right-${ni}`;
+        mainRow.appendChild(railRight);
+        canvas.appendChild(mainRow);
+        
+        // Counter parallel rows (D og R) - línur sem fara inn á counter
+        if(net.counter){
+            const counterCell = net.counter.cell;
+            const afterCell = counterCell - 1;
+            
+            // D lína
+            const dRow = document.createElement('div');
+            dRow.className = 'branch-row counter-branch';
+            const dSpacer = document.createElement('div');
+            dSpacer.className = 'branch-spacer';
+            dSpacer.style.width = (afterCell * CELL_W + 4) + 'px';
+            dRow.appendChild(dSpacer);
+            
+            const dCells = document.createElement('div');
+            dCells.className = 'branch-cells counter-branch-cells';
+            dCells.style.position = 'relative';
+            
+            // D label
+            const dLabel = document.createElement('div');
+            dLabel.className = 'counter-line-label';
+            dLabel.textContent = 'D';
+            dCells.appendChild(dLabel);
+            
+            // D cell (aðeins einn reitur fyrir counter)
+            const dCellContainer = document.createElement('div');
+            const isDCursor = cursorInfo && cursorInfo.network===ni && cursorInfo.cell===counterCell && cursorInfo.row==='counter-d';
+            dCellContainer.className = 'branch-cell counter-line-cell' + (isDCursor?' cursor':'');
+            dCellContainer.dataset.network = ni;
+            dCellContainer.dataset.cell = counterCell;
+            dCellContainer.dataset.row = 'counter-d';
+            const dData = net.counter.dCells?.[counterCell];
+            if(dData){
+                const comp = createComponent(dData, ni, counterCell, 'counter-d');
+                dCellContainer.appendChild(comp);
+            }
+            dCells.appendChild(dCellContainer);
+            dRow.appendChild(dCells);
+            canvas.appendChild(dRow);
+            
+            // R lína
+            const rRow = document.createElement('div');
+            rRow.className = 'branch-row counter-branch';
+            const rSpacer = document.createElement('div');
+            rSpacer.className = 'branch-spacer';
+            rSpacer.style.width = (afterCell * CELL_W + 4) + 'px';
+            rRow.appendChild(rSpacer);
+            
+            const rCells = document.createElement('div');
+            rCells.className = 'branch-cells counter-branch-cells';
+            rCells.style.position = 'relative';
+            
+            // R label
+            const rLabel = document.createElement('div');
+            rLabel.className = 'counter-line-label';
+            rLabel.textContent = 'R';
+            rCells.appendChild(rLabel);
+            
+            // R cell
+            const rCellContainer = document.createElement('div');
+            const isRCursor = cursorInfo && cursorInfo.network===ni && cursorInfo.cell===counterCell && cursorInfo.row==='counter-r';
+            rCellContainer.className = 'branch-cell counter-line-cell' + (isRCursor?' cursor':'');
+            rCellContainer.dataset.network = ni;
+            rCellContainer.dataset.cell = counterCell;
+            rCellContainer.dataset.row = 'counter-r';
+            const rData = net.counter.rCells?.[counterCell];
+            if(rData){
+                const comp = createComponent(rData, ni, counterCell, 'counter-r');
+                rCellContainer.appendChild(comp);
+            }
+            rCells.appendChild(rCellContainer);
+            rRow.appendChild(rCells);
+            canvas.appendChild(rRow);
+        }
+        
+        // Margar parallel branches
+        if(net.branches && net.branches.length > 0){
+            net.branches.forEach((branch, bi) => {
+                const branchRow = document.createElement('div');
+                branchRow.className = 'branch-row';
+                const spacer = document.createElement('div');
+                spacer.className = 'branch-spacer';
+                spacer.style.width = ((branch.afterCell+1)*CELL_W)+'px';
+                branchRow.appendChild(spacer);
+                const branchCells = document.createElement('div');
+                branchCells.className = 'branch-cells';
+                branchCells.style.position = 'relative';
+                
+                // Fyrsta branch fær ◀▶ controls, aðrar fá bara +
+                if(bi === 0){
+                    branchCells.innerHTML = `<div class="branch-controls start-controls"><button class="branch-btn" onclick="moveBranchStart(${ni},-1)" ${branch.afterCell<0?'disabled':''}>◀</button><button class="branch-btn" onclick="moveBranchStart(${ni},1)" ${branch.afterCell>=branch.returnAfterCell-1?'disabled':''}>▶</button></div>`;
+                }
+                
+                const numBranchCells = branch.returnAfterCell - branch.afterCell;
+                for(let i=0;i<numBranchCells;i++){
+                    const bci = branch.afterCell+1+i;
+                    const cell = document.createElement('div');
+                    const isCursor = cursorInfo && cursorInfo.network===ni && cursorInfo.cell===bci && cursorInfo.row===('branch-'+bi);
+                    cell.className = 'branch-cell'+(isCursor?' cursor':'');
+                    cell.dataset.network=ni; cell.dataset.cell=bci; cell.dataset.row='branch-'+bi; cell.dataset.branchIndex=bi;
+                    if(branch.cells&&branch.cells[bci]) cell.appendChild(createComponent(branch.cells[bci],ni,bci,'branch-'+bi));
+                    branchCells.appendChild(cell);
+                }
+                
+                // Controls á hægri: + til að bæta við, ✕ til að eyða
+                let controlsHtml = '<div class="branch-controls end-controls">';
+                if(bi === 0){
+                    controlsHtml += `<button class="branch-btn" onclick="moveBranchEnd(${ni},-1)" ${branch.returnAfterCell<=branch.afterCell+1?'disabled':''}>◀</button>`;
+                    controlsHtml += `<button class="branch-btn" onclick="moveBranchEnd(${ni},1)" ${branch.returnAfterCell>=5?'disabled':''}>▶</button>`;
+                }
+                controlsHtml += `<button class="branch-btn add" onclick="addParallelBranch(${ni})">+</button>`;
+                controlsHtml += `<button class="branch-btn delete" onclick="deleteBranch(${ni},${bi})">✕</button>`;
+                controlsHtml += '</div>';
+                branchCells.innerHTML += controlsHtml;
+                
+                branchRow.appendChild(branchCells);
+                canvas.appendChild(branchRow);
+            });
+        }
+        body.appendChild(canvas);
+        netEl.appendChild(body);
+        grid.appendChild(netEl);
+        drawWires(ni);
+    });
+    setupDropZones();
+    makeDraggable();
+}
+function drawWires(ni){
+    const svg=document.getElementById(`svg-${ni}`); if(!svg)return; svg.innerHTML='';
+    const net=networks[ni], y1=23, y2=75, railW=4;
+    
+    for(let ci=0;ci<=6;ci++){
+        const comp = net.mainCells[ci];
+        const isTimer = comp?.type?.startsWith('timer');
+        const isCounter = comp?.type === 'counter';
+        const isCompare = comp?.type === 'compare';
+        
+        if((isTimer || isCounter || isCompare) && ci < 4){
+            // Timer/Counter í miðju - teikna línu AÐ blokk (stutt lína)
+            const x1 = railW + ci * CELL_W;
+            const x2 = x1 + 8; // Stutt lína að blokk
+            const line1 = document.createElementNS('http://www.w3.org/2000/svg','line');
+            line1.setAttribute('x1',x1);line1.setAttribute('y1',y1);line1.setAttribute('x2',x2);line1.setAttribute('y2',y1);
+            line1.id=`wire-main-${ni}-${ci}-a`; 
+            line1.classList.add(`wire-main-${ni}-${ci}`);
+            svg.appendChild(line1);
+            
+            // Lína FRÁ blokk
+            const x3 = railW + (ci+1) * CELL_W - 8; // Byrja aftan við blokk
+            const x4 = railW + (ci+1) * CELL_W;
+            const line2 = document.createElementNS('http://www.w3.org/2000/svg','line');
+            line2.setAttribute('x1',x3);line2.setAttribute('y1',y1);line2.setAttribute('x2',x4);line2.setAttribute('y2',y1);
+            line2.id=`wire-main-${ni}-${ci}-b`; 
+            line2.classList.add(`wire-main-${ni}-${ci}`);
+            svg.appendChild(line2);
+        } else {
+            // Venjuleg lína
+            const x1=railW+ci*CELL_W, x2=ci===6?railW+ci*CELL_W+28:railW+(ci+1)*CELL_W;
+            const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+            line.setAttribute('x1',x1);line.setAttribute('y1',y1);line.setAttribute('x2',x2);line.setAttribute('y2',y1);
+            line.id=`wire-main-${ni}-${ci}`; svg.appendChild(line);
+        }
+    }
+    
+    // Margar branches
+    if(net.branches && net.branches.length > 0){
+        const firstBranch = net.branches[0];
+        const downX = railW + (firstBranch.afterCell+1) * CELL_W;
+        const upX = railW + (firstBranch.returnAfterCell+1) * CELL_W;
+        
+        // Reikna hæð fyrir allar branches
+        const branchCount = net.branches.length;
+        const branchSpacing = 52; // px á milli branches
+        
+        net.branches.forEach((branch, bi) => {
+            const yBranch = y2 + (bi * branchSpacing);
+            
+            // Niður lína
+            const downLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+            downLine.setAttribute('x1', downX);
+            downLine.setAttribute('y1', bi === 0 ? y1 : y2 + ((bi-1) * branchSpacing));
+            downLine.setAttribute('x2', downX);
+            downLine.setAttribute('y2', yBranch);
+            downLine.id = `wire-down-${ni}-${bi}`;
+            downLine.classList.add(`wire-branch-${ni}`);
+            svg.appendChild(downLine);
+            
+            // Lárétt branch lína
+            const branchLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+            branchLine.setAttribute('x1', downX);
+            branchLine.setAttribute('y1', yBranch);
+            branchLine.setAttribute('x2', upX);
+            branchLine.setAttribute('y2', yBranch);
+            branchLine.id = `wire-branch-${ni}-${bi}`;
+            branchLine.classList.add(`wire-branch-${ni}`);
+            svg.appendChild(branchLine);
+            
+            // Upp lína (aðeins fyrir síðustu branch)
+            if(bi === branchCount - 1){
+                const upLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+                upLine.setAttribute('x1', upX);
+                upLine.setAttribute('y1', yBranch);
+                upLine.setAttribute('x2', upX);
+                upLine.setAttribute('y2', y1);
+                upLine.id = `wire-up-${ni}`;
+                upLine.classList.add(`wire-branch-${ni}`);
+                svg.appendChild(upLine);
+            } else {
+                // Tengja við næstu branch
+                const upLine = document.createElementNS('http://www.w3.org/2000/svg','line');
+                upLine.setAttribute('x1', upX);
+                upLine.setAttribute('y1', yBranch);
+                upLine.setAttribute('x2', upX);
+                upLine.setAttribute('y2', y2 + (bi * branchSpacing));
+                upLine.id = `wire-up-${ni}-${bi}`;
+                upLine.classList.add(`wire-branch-${ni}`);
+                svg.appendChild(upLine);
+            }
+        });
+    }
+}
+function createComponent(comp,ni,ci,row){
+    const el=document.createElement('div');
+    el.className=`cell-component ${comp.type}`;
+    el.dataset.componentType=comp.type; el.dataset.io=comp.io||''; el.dataset.ioType=comp.io?(comp.io[0]==='i'?'i':comp.io[0]):'';
+    el.dataset.network=ni; el.dataset.cell=ci; el.dataset.row=row;
+    
+    if(comp.type.startsWith('timer')){
+        // Timer blokk - sýnir mode og format
+        const ts = getTimerState(comp.io);
+        const mode = ts.mode || 'ton';
+        const modeNames = {ton:'TON',tof:'TOF',pulse:'PULSE',flash:'FLASH'};
+        const ptStr = formatTime(ts.preset, ts.timeFormat);
+        const etStr = formatTime(ts.elapsed, ts.timeFormat);
+        const percent = ts.preset > 0 ? (ts.elapsed / ts.preset) * 100 : 0;
+        const isComplete = ts.output;
+        el.innerHTML = `
+            <div class="timer-block">
+                <div class="timer-header">
+                    <span class="timer-type">${modeNames[mode]||'T'}</span>
+                    <span class="timer-name">${comp.io||'T?'}</span>
+                </div>
+                <div class="timer-row">
+                    <span class="timer-label">PT:</span>
+                    <span class="timer-value">${ptStr}</span>
+                </div>
+                <div class="timer-row">
+                    <span class="timer-label">ET:</span>
+                    <span class="timer-value ${isComplete?'active':''}">${etStr}</span>
+                </div>
+                <div class="timer-bar">
+                    <div class="timer-bar-fill ${isComplete?'complete':''}" style="width:${percent}%"></div>
+                </div>
+            </div>
+        `;
+    } else if(comp.type === 'counter'){
+        // Counter blokk - 3 línur með C, D, R inngöngum
+        const cs = getCounterState(comp.io);
+        const percent = cs.preset > 0 ? Math.min((cs.cv / cs.preset) * 100, 100) : 0;
+        const isComplete = cs.output;
+        const net = networks[ni];
+        const dActive = net.counter?.dActive || false;
+        const rActive = net.counter?.rActive || false;
+        const cActive = cs.lastC || false;
+        el.innerHTML = `
+            <div class="counter-block-3row">
+                <div class="counter-row-input ${cActive?'active':''}">
+                    <span class="row-arrow">●──</span>
+                    <span class="row-label">C</span>
+                    <div class="row-content">
+                        <span class="counter-type">CNT</span>
+                        <span class="counter-name">${comp.io||'C?'}</span>
+                    </div>
+                    <span class="row-output"></span>
+                </div>
+                <div class="counter-row-input ${dActive?'active':''}">
+                    <span class="row-arrow">●──</span>
+                    <span class="row-label">D</span>
+                    <div class="row-content">
+                        <span class="counter-label">PV:</span>
+                        <span class="counter-value">${cs.preset}</span>
+                    </div>
+                    <span class="row-output ${isComplete?'active':''}">──● Q</span>
+                </div>
+                <div class="counter-row-input ${rActive?'active':''}">
+                    <span class="row-arrow">●──</span>
+                    <span class="row-label">R</span>
+                    <div class="row-content">
+                        <span class="counter-label">CV:</span>
+                        <span class="counter-value ${isComplete?'active':''}">${cs.cv}</span>
+                    </div>
+                    <span class="row-output"></span>
+                </div>
+                <div class="counter-bar-row">
+                    <div class="counter-bar">
+                        <div class="counter-bar-fill ${isComplete?'complete':''}" style="width:${percent}%"></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if(comp.type === 'compare'){
+        // Analog Compare blokk
+        const cps = getCompareState(comp.io);
+        const iaVal = analogState[cps.input] || 0;
+        const val2 = getCompareVal2(cps);
+        const val2Label = cps.input2Type === 'analog' ? cps.input2 : cps.threshold;
+        const percent = Math.min((iaVal / 1000) * 100, 100);
+        const result = evalCompare(cps.op, iaVal, val2);
+        el.innerHTML = `
+            <div class="compare-block">
+                <div class="compare-header">
+                    <span class="compare-type">CMP</span>
+                    <span class="compare-name">${comp.io||'A?'}</span>
+                </div>
+                <div class="compare-row">
+                    <span class="compare-label">${cps.input}:</span>
+                    <span class="compare-value ${result?'active':''}">${iaVal}</span>
+                </div>
+                <div class="compare-op">${cps.op} ${val2Label}${cps.input2Type==='analog'?'('+val2+')':''}</div>
+                <div class="compare-bar">
+                    <div class="compare-bar-fill ${result?'active':''}" style="width:${percent}%"></div>
+                </div>
+            </div>
+        `;
+    } else {
+        const symbols={'contact-make':'] [','contact-break':']/[','coil-normal':'( )','coil-set':'(S)','coil-reset':'(R)'};
+        el.innerHTML=`<div class="component-symbol">${symbols[comp.type]||''}</div><div class="component-label">${comp.io||'???'}</div>`;
+    }
+    el.onclick=(e)=>{e.stopPropagation();moveCursor(ni,ci,row);};
+    return el;
+}
+
+// Branch functions - margar parallel línur
+function addBranch(ni, afterCell){
+    if(!networks[ni].branches) networks[ni].branches = [];
+    if(networks[ni].branches.length > 0) return; // Nota addParallelBranch til að bæta við fleiri
+    networks[ni].branches.push({
+        afterCell: afterCell,
+        returnAfterCell: Math.min(afterCell+1, 5),
+        cells: [null,null,null,null,null,null]
+    });
+    renderLadder();
+}
+
+function addParallelBranch(ni){
+    if(!networks[ni].branches || networks[ni].branches.length === 0) return;
+    const firstBranch = networks[ni].branches[0];
+    // Nýja lína með sama afterCell og returnAfterCell
+    networks[ni].branches.push({
+        afterCell: firstBranch.afterCell,
+        returnAfterCell: firstBranch.returnAfterCell,
+        cells: [null,null,null,null,null,null]
+    });
+    renderLadder();
+}
+
+function deleteBranch(ni, bi){
+    if(!networks[ni].branches) return;
+    if(bi === undefined){
+        // Eyða öllum
+        networks[ni].branches = [];
+    } else {
+        networks[ni].branches.splice(bi, 1);
+    }
+    renderLadder();
+}
+
+function moveBranchStart(ni, dir){
+    if(!networks[ni].branches || networks[ni].branches.length === 0) return;
+    const b = networks[ni].branches[0];
+    if(b.afterCell+dir >= -1 && b.afterCell+dir < b.returnAfterCell){
+        const newAfter = b.afterCell + dir;
+        // Uppfæra allar branches
+        networks[ni].branches.forEach(branch => {
+            branch.afterCell = newAfter;
+        });
+        renderLadder();
+    }
+}
+
+function moveBranchEnd(ni, dir){
+    if(!networks[ni].branches || networks[ni].branches.length === 0) return;
+    const b = networks[ni].branches[0];
+    if(b.returnAfterCell+dir > b.afterCell && b.returnAfterCell+dir <= 3){
+        const newReturn = b.returnAfterCell + dir;
+        // Uppfæra allar branches
+        networks[ni].branches.forEach(branch => {
+            branch.returnAfterCell = newReturn;
+        });
+        renderLadder();
+    }
+}
+
+
+// Counter functions
+function addCounter(ni, cell, io){
+    if(networks[ni].counter) return;
+    if(cell < 1) cell = 1; // Counter getur aldrei verið í reit 0
+    if(cell > 3) cell = 3; // eða reit 4 (output)
+    networks[ni].counter = {
+        cell: cell,
+        io: io,
+        // D og R línur - cells fyrir hverja
+        dCells: [null,null,null,null],
+        rCells: [null,null,null,null],
+        // Active states
+        cActive: false,  // Main lína (count)
+        dActive: false,  // D lína (direction/down)
+        rActive: false   // R lína (reset)
+    };
+    networks[ni].mainCells[cell] = {type:'counter', io: io};
+    renderLadder();
+}
+function deleteCounter(ni){
+    if(!networks[ni].counter) return;
+    const cell = networks[ni].counter.cell;
+    networks[ni].mainCells[cell] = null;
+    networks[ni].counter = null;
+    renderLadder();
+}
+
+let draggedType=null,draggedFrom=null;
+function setupDragAndDrop(){document.querySelectorAll('.tool-item').forEach(item=>{item.addEventListener('dragstart',dragStart);item.addEventListener('dragend',dragEnd);});}
+function makeDraggable(){document.querySelectorAll('.cell-component').forEach(c=>{c.draggable=true;c.addEventListener('dragstart',dragStart);c.addEventListener('dragend',dragEnd);});}
+function setupDropZones(){
+    document.querySelectorAll('.ladder-cell,.branch-cell,.counter-line-cell').forEach(cell=>{cell.addEventListener('dragover',dragOver);cell.addEventListener('dragleave',dragLeave);cell.addEventListener('drop',drop);});
+    const dz=document.getElementById('delete-zone');
+    dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag-over');});
+    dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
+    dz.addEventListener('drop',deleteDrop);
+}
+function dragStart(e){
+    draggedType=e.target.dataset.type||e.target.closest('.cell-component')?.dataset.componentType;
+    const comp=e.target.closest('.cell-component');
+    if(comp) draggedFrom={network:+comp.dataset.network,cell:+comp.dataset.cell,row:comp.dataset.row};
+    e.target.classList.add('dragging');
+    document.getElementById('delete-zone').classList.add('visible');
+    // Custom drag image
+    e.dataTransfer.setData('text/plain','');
+    e.dataTransfer.effectAllowed='move';
+    const ghost = e.target.cloneNode(true);
+    ghost.style.position='absolute';
+    ghost.style.top='-1000px';
+    ghost.style.opacity='0.85';
+    ghost.style.transform='scale(1.05)';
+    ghost.style.pointerEvents='none';
+    ghost.style.zIndex='9999';
+    ghost.id='drag-ghost';
+    document.body.appendChild(ghost);
+    e.dataTransfer.setDragImage(ghost, ghost.offsetWidth/2, ghost.offsetHeight/2);
+    setTimeout(()=>ghost.remove(),0);
+}
+function dragEnd(e){e.target.classList.remove('dragging');document.getElementById('delete-zone').classList.remove('visible');document.querySelectorAll('.ladder-cell,.branch-cell').forEach(c=>c.classList.remove('drop-target'));draggedFrom=null;}
+function dragOver(e){e.preventDefault();const cell=e.target.closest('.ladder-cell,.branch-cell');if(!cell)return;const isOut=cell.classList.contains('output-cell'),isCoil=draggedType?.startsWith('coil'),isTimer=draggedType?.startsWith('timer'),isCompare=draggedType==='compare';if((isOut&&isCoil)||(!isOut&&!isCoil))cell.classList.add('drop-target');}
+function dragLeave(e){e.target.closest('.ladder-cell,.branch-cell')?.classList.remove('drop-target');}
+function drop(e){
+    e.preventDefault();const cell=e.target.closest('.ladder-cell,.branch-cell,.counter-line-cell');if(!cell)return;cell.classList.remove('drop-target');
+    const ni=+cell.dataset.network,ci=+cell.dataset.cell,row=cell.dataset.row,isOut=cell.classList.contains('output-cell'),isCoil=draggedType?.startsWith('coil'),isTimer=draggedType?.startsWith('timer'),isCounter=draggedType==='counter';
+    
+    // Counter - sérmeðhöndlun (aldrei í reit 0)
+    if(isCounter && !isOut && ci >= 1 && ci < 4){
+        addCounter(ni, ci, 'C1');
+        return;
+    }
+    
+    // Counter line cells (D og R)
+    if(row?.startsWith('counter-')){
+        const lineType = row.replace('counter-','');
+        const net = networks[ni];
+        if(net.counter && !isCoil && !isTimer && !isCounter){
+            let defaultIO = 'i1';
+            net.counter[lineType+'Cells'][ci] = {type:draggedType||'contact-make', io:defaultIO};
+            renderLadder();
+        }
+        return;
+    }
+    
+    if((isOut&&!isCoil)||(!isOut&&isCoil))return;
+    
+    // Hreinsa frá gamalli staðsetningu
+    if(draggedFrom){
+        const net=networks[draggedFrom.network];
+        if(draggedFrom.row?.startsWith('branch-')){
+            const bi = parseInt(draggedFrom.row.split('-')[1]);
+            if(net.branches && net.branches[bi]) net.branches[bi].cells[draggedFrom.cell]=null;
+        } else {
+            net.mainCells[draggedFrom.cell]=null;
+        }
+    }
+    
+    let defaultIO=isCoil?'Q1':isTimer?'T1':draggedType==='compare'?'A1':'i1';
+    const net=networks[ni];
+    
+    // Branch cells
+    if(row?.startsWith('branch-')){
+        const bi = parseInt(row.split('-')[1]);
+        if(net.branches && net.branches[bi]){
+            if(!net.branches[bi].cells) net.branches[bi].cells=[null,null,null,null];
+            net.branches[bi].cells[ci]={type:draggedType,io:defaultIO};
+        }
+    } else {
+        net.mainCells[ci]={type:draggedType,io:defaultIO};
+    }
+    cursorInfo = {network:ni, cell:ci, row:row};
+    renderLadder();
+    setTimeout(()=>{moveCursor(ni,ci,row);},30);
+}
+function deleteDrop(e){
+    e.preventDefault();
+    document.getElementById('delete-zone').classList.remove('drag-over');
+    if(draggedFrom){
+        const net=networks[draggedFrom.network];
+        if(draggedFrom.row?.startsWith('branch-')){
+            const bi = parseInt(draggedFrom.row.split('-')[1]);
+            if(net.branches && net.branches[bi]) net.branches[bi].cells[draggedFrom.cell]=null;
+        } else if(draggedFrom.row?.startsWith('counter-')){
+            // Eyða úr counter línu
+            const lineType = draggedFrom.row.replace('counter-','');
+            if(net.counter) net.counter[lineType+'Cells'][draggedFrom.cell]=null;
+        } else {
+            // Athuga hvort þetta er counter - eyða counter structure líka
+            const comp = net.mainCells[draggedFrom.cell];
+            if(comp?.type === 'counter'){
+                net.counter = null;
+            }
+            net.mainCells[draggedFrom.cell]=null;
+        }
+        renderLadder();
+    }
+}
+function selectComponent(el,ni,ci,row){
+    document.querySelectorAll('.cell-component').forEach(c=>c.classList.remove('selected'));
+    selectedComponent=el;selectedInfo={network:ni,cell:ci,row};el.classList.add('selected');
+    // Færa cursor á valinn íhlut
+    cursorInfo = {network:ni, cell:ci, row:row};
+    // Færa ▼ merkið sjónrænt
+    document.querySelectorAll('.ladder-cell.cursor, .branch-cell.cursor, .counter-line-cell.cursor').forEach(c=>c.classList.remove('cursor'));
+    el.closest('.ladder-cell, .branch-cell, .counter-line-cell')?.classList.add('cursor');
+    // Deselect analog
+    selectedAnalog = null;
+    document.querySelectorAll('.analog-slider-wrapper').forEach(w=>w.classList.remove('selected'));
+    
+    updatePropsPanel();
+}
+
+function clearSelection(){
+    document.querySelectorAll('.cell-component').forEach(c=>c.classList.remove('selected'));
+    selectedComponent=null;selectedInfo=null;
+    updatePropsPanel();
+}
+
+function updatePropsPanel(){
+    const container = document.getElementById('props-content');
+    const t = translations[currentLang];
+    
+    // --- ANALOG INPUT properties ---
+    if(selectedAnalog){
+        let html = `<div class="prop-card">`;
+        html += `<div class="prop-card-header">`;
+        html += `<span class="prop-card-icon">📊</span>`;
+        html += `<span class="prop-card-title" style="color:#f97316">${currentLang==='is'?'Analog inngangar':'Analog Inputs'}</span>`;
+        html += `<span class="prop-card-subtitle">0–10V</span>`;
+        html += `</div>`;
+        
+        ['IA1','IA2','IA3','IA4'].forEach(ia => {
+            const val = analogState[ia] || 0;
+            const volt = (val / 100).toFixed(1);
+            const percent = (val / 1000) * 100;
+            
+            html += `<div class="prop-analog-item">`;
+            html += `<div class="prop-analog-header">`;
+            html += `<span class="prop-analog-name">${ia}</span>`;
+            html += `<span class="prop-analog-volt">${volt}V</span>`;
+            html += `</div>`;
+            html += `<div class="prop-slider-row"><input type="range" class="prop-slider orange" min="0" max="1000" value="${val}" oninput="propSetAnalog('${ia}',+this.value)"></div>`;
+            html += `<div class="prop-row">`;
+            html += `<input type="number" class="prop-input" style="width:60px" min="0" max="1000" value="${val}" onchange="propSetAnalog('${ia}',+this.value)">`;
+            html += `<div class="prop-volt-bar" style="flex:1;margin:0 0.4rem"><div class="prop-volt-bar-fill" style="width:${percent}%"></div></div>`;
+            html += `<span class="prop-value" style="color:#f97316;min-width:35px;text-align:right">${volt}V</span>`;
+            html += `</div>`;
+            html += `</div>`;
+        });
+        
+        // Scale info
+        html += `<div style="padding:0.3rem 0.5rem;font-size:0.55rem;color:var(--text-muted);text-align:center;border-top:1px solid var(--border)">0 = 0V &nbsp;│&nbsp; 500 = 5V &nbsp;│&nbsp; 1000 = 10V</div>`;
+        
+        html += `</div>`;
+        container.innerHTML = html;
+        return;
+    }
+    
+    if(!selectedInfo || !selectedComponent){
+        container.innerHTML = `<div class="prop-empty"><div class="prop-empty-icon">🔧</div><span>${t.propsEmpty}</span></div>`;
+        return;
+    }
+    
+    const {network:ni, cell:ci, row} = selectedInfo;
+    const net = networks[ni];
+    let comp;
+    if(row?.startsWith('branch-')){
+        const bi = parseInt(row.split('-')[1]);
+        comp = net.branches?.[bi]?.cells?.[ci];
+    } else if(row?.startsWith('counter-')){
+        const lineType = row.replace('counter-','');
+        comp = net.counter?.[lineType+'Cells']?.[ci];
+    } else {
+        comp = net.mainCells[ci];
+    }
+    
+    if(!comp){
+        container.innerHTML = `<div class="prop-empty"><div class="prop-empty-icon">📍</div><span>N${ni+1} : ${t.propsAddress} ${ci}</span></div>`;
+        return;
+    }
+    
+    const typeNames = {
+        'contact-make': 'NO Contact (Make)',
+        'contact-break': 'NC Contact (Break)',
+        'coil-normal': 'Coil',
+        'coil-set': 'SET Coil',
+        'coil-reset': 'RESET Coil',
+        'timer-ton': 'Timer ON Delay (TON)',
+        'timer-tof': 'Timer OFF Delay (TOF)',
+        'counter': 'Counter (CNT)',
+        'compare': 'Analog Compare (CMP)'
+    };
+    const typeIcons = {
+        'contact-make': '⚡', 'contact-break': '🚫',
+        'coil-normal': '🔵', 'coil-set': '🟢', 'coil-reset': '🔴',
+        'timer-ton': '⏱️', 'timer-tof': '⏱️',
+        'counter': '🔢', 'compare': '📊'
+    };
+    const typeColors = {
+        'contact-make': 'var(--success)', 'contact-break': 'var(--error)',
+        'coil-normal': 'var(--warning)', 'coil-set': 'var(--success)', 'coil-reset': 'var(--error)',
+        'timer-ton': 'var(--cyan)', 'timer-tof': 'var(--cyan)',
+        'counter': 'var(--purple)', 'compare': '#f97316'
+    };
+    
+    let html = `<div class="prop-card">`;
+    html += `<div class="prop-card-header">`;
+    html += `<span class="prop-card-icon">${typeIcons[comp.type]||'❓'}</span>`;
+    html += `<span class="prop-card-title" style="color:${typeColors[comp.type]||'inherit'}">${typeNames[comp.type]||comp.type}</span>`;
+    html += `<span class="prop-card-subtitle">${comp.io||'?'}</span>`;
+    html += `</div>`;
+    
+    // --- COMPARE properties ---
+    if(comp.type === 'compare'){
+        const cps = getCompareState(comp.io);
+        const iaVal = analogState[cps.input] || 0;
+        const val2 = getCompareVal2(cps);
+        const result = evalCompare(cps.op, iaVal, val2);
+        
+        html += `<div class="prop-section">`;
+        html += `<div class="prop-section-title">${t.propsSettings}</div>`;
+        
+        // Compare number
+        const aNum = comp.io ? parseInt(comp.io.replace(/\D/g,'')) : 1;
+        html += `<div class="prop-row"><span class="prop-label">${t.propsAddress}</span>`;
+        html += `<select class="prop-select" onchange="propSetIODirect(${ni},${ci},'${row}','A'+this.value)">`;
+        for(let n=1; n<=8; n++){
+            html += `<option value="${n}" ${aNum===n?'selected':''}>A${n}</option>`;
+        }
+        html += `</select></div>`;
+        
+        // Input 1
+        html += `<div class="prop-row"><span class="prop-label">Input 1</span>`;
+        html += `<select class="prop-select" onchange="propSetCompareInput('${comp.io}',this.value)">`;
+        ['IA1','IA2','IA3','IA4'].forEach(ia => {
+            html += `<option value="${ia}" ${cps.input===ia?'selected':''}>${ia} (${analogState[ia]})</option>`;
+        });
+        html += `</select></div>`;
+        
+        // Operator
+        html += `<div class="prop-row"><span class="prop-label">${t.propsOperator}</span>`;
+        html += `<select class="prop-select" onchange="propSetCompareOp('${comp.io}',this.value)">`;
+        ['>=','<=','>','<','==','!='].forEach(op => {
+            html += `<option value="${op}" ${cps.op===op?'selected':''}>${op}</option>`;
+        });
+        html += `</select></div>`;
+        
+        // Input 2 type (Analog eða Fasti)
+        html += `<div class="prop-row"><span class="prop-label">Input 2</span>`;
+        html += `<select class="prop-select" onchange="propSetCompareInput2Type('${comp.io}',this.value)">`;
+        html += `<option value="const" ${cps.input2Type==='const'?'selected':''}>${currentLang==='is'?'Fasti':'Constant'}</option>`;
+        ['IA1','IA2','IA3','IA4'].forEach(ia => {
+            html += `<option value="${ia}" ${cps.input2Type==='analog'&&cps.input2===ia?'selected':''}>${ia} (${analogState[ia]})</option>`;
+        });
+        html += `</select></div>`;
+        
+        // Ef fasti - sýna threshold slider
+        if(cps.input2Type === 'const'){
+            html += `<div class="prop-row"><span class="prop-label">${t.propsThreshold}</span>`;
+            html += `<input type="number" class="prop-input" min="0" max="1000" value="${cps.threshold}" onchange="propSetCompareThreshold('${comp.io}',+this.value)"></div>`;
+            html += `<div class="prop-slider-row"><input type="range" class="prop-slider orange" min="0" max="1000" value="${cps.threshold}" oninput="propSetCompareThreshold('${comp.io}',+this.value)"></div>`;
+        }
+        html += `</div>`;
+        
+        // Status
+        const val2Label = cps.input2Type === 'analog' ? `${cps.input2}(${val2})` : val2;
+        html += `<div class="prop-status">`;
+        html += `<div class="prop-status-dot ${result?'active':''}"></div>`;
+        html += `<span class="prop-status-label">${cps.input}(${iaVal}) ${cps.op} ${val2Label} → ${result?t.propsActive:t.propsInactive}</span>`;
+        html += `</div>`;
+    }
+    // --- TIMER properties ---
+    else if(comp.type.startsWith('timer')){
+        const ts = getTimerState(comp.io);
+        const mode = ts.mode || 'ton';
+        const fmt = ts.timeFormat || 's';
+        const ptStr = formatTime(ts.preset, fmt);
+        const etStr = formatTime(ts.elapsed, fmt);
+        const maxPT = getMaxPreset(fmt);
+        const stepPT = getPresetStep(fmt);
+        
+        html += `<div class="prop-section">`;
+        html += `<div class="prop-section-title">${t.propsSettings}</div>`;
+        
+        // Mode select
+        html += `<div class="prop-row"><span class="prop-label">${t.propsType}</span>`;
+        html += `<select class="prop-select" onchange="propSetTimerMode('${comp.io}',this.value)">`;
+        html += `<option value="ton" ${mode==='ton'?'selected':''}>TON - On Delay</option>`;
+        html += `<option value="tof" ${mode==='tof'?'selected':''}>TOF - Off Delay</option>`;
+        html += `<option value="pulse" ${mode==='pulse'?'selected':''}>PULSE - Single</option>`;
+        html += `<option value="flash" ${mode==='flash'?'selected':''}>FLASH - Blikk</option>`;
+        html += `</select></div>`;
+        
+        // Timer number
+        const tNum = comp.io ? parseInt(comp.io.replace(/\D/g,'')) : 1;
+        html += `<div class="prop-row"><span class="prop-label">${t.propsAddress}</span>`;
+        html += `<select class="prop-select" onchange="propSetIODirect(${ni},${ci},'${row}','T'+this.value)">`;
+        for(let n=1; n<=8; n++){
+            html += `<option value="${n}" ${tNum===n?'selected':''}>T${n}</option>`;
+        }
+        html += `</select></div>`;
+        
+        // Time format
+        html += `<div class="prop-row"><span class="prop-label">${currentLang==='is'?'Tímasnið':'Time format'}</span>`;
+        html += `<select class="prop-select" onchange="propSetTimerFormat('${comp.io}',this.value)">`;
+        html += `<option value="s" ${fmt==='s'?'selected':''}>S (${currentLang==='is'?'sekúndur':'seconds'})</option>`;
+        html += `<option value="mmss" ${fmt==='mmss'?'selected':''}>MM:SS</option>`;
+        html += `<option value="hhmm" ${fmt==='hhmm'?'selected':''}>HH:MM</option>`;
+        html += `</select></div>`;
+        
+        // PT
+        html += `<div class="prop-row"><span class="prop-label">PT (${t.propsPreset})</span>`;
+        if(fmt === 's'){
+            html += `<input type="number" class="prop-input" min="0.5" max="30" step="0.5" value="${(ts.preset/1000).toFixed(1)}" onchange="propSetTimerPT('${comp.io}',+this.value*1000)"> s</div>`;
+            html += `<div class="prop-slider-row"><input type="range" class="prop-slider cyan" min="500" max="30000" step="500" value="${ts.preset}" oninput="propSetTimerPT('${comp.io}',+this.value)"></div>`;
+        } else if(fmt === 'mmss'){
+            const totalSec = Math.floor(ts.preset/1000);
+            const mm = Math.floor(totalSec/60);
+            const ss = totalSec % 60;
+            html += `<span class="prop-value" style="color:var(--cyan)">${ptStr}</span></div>`;
+            html += `<div class="prop-row"><span class="prop-label" style="font-size:0.6rem">MM</span>`;
+            html += `<input type="number" class="prop-input" min="0" max="99" value="${mm}" onchange="propSetTimerMMSS('${comp.io}',+this.value,${ss})"></div>`;
+            html += `<div class="prop-row"><span class="prop-label" style="font-size:0.6rem">SS</span>`;
+            html += `<input type="number" class="prop-input" min="0" max="59" value="${ss}" onchange="propSetTimerMMSS('${comp.io}',${mm},+this.value)"></div>`;
+        } else if(fmt === 'hhmm'){
+            const totalMin = Math.floor(ts.preset/60000);
+            const hh = Math.floor(totalMin/60);
+            const mmv = totalMin % 60;
+            html += `<span class="prop-value" style="color:var(--cyan)">${ptStr}</span></div>`;
+            html += `<div class="prop-row"><span class="prop-label" style="font-size:0.6rem">HH</span>`;
+            html += `<input type="number" class="prop-input" min="0" max="23" value="${hh}" onchange="propSetTimerHHMM('${comp.io}',+this.value,${mmv})"></div>`;
+            html += `<div class="prop-row"><span class="prop-label" style="font-size:0.6rem">MM</span>`;
+            html += `<input type="number" class="prop-input" min="0" max="59" value="${mmv}" onchange="propSetTimerHHMM('${comp.io}',${hh},+this.value)"></div>`;
+        }
+        
+        // ET display
+        html += `<div class="prop-row"><span class="prop-label">ET (${t.propsCurrent})</span>`;
+        html += `<span class="prop-value" style="color:${ts.output?'var(--success)':'var(--cyan)'}">${etStr}</span></div>`;
+        html += `</div>`;
+        
+        // Mode lýsing
+        const modeDescs = {
+            ton: currentLang==='is' ? 'Seinkun áður en úttak kveikir' : 'Delay before output turns ON',
+            tof: currentLang==='is' ? 'Seinkun áður en úttak slekkur' : 'Delay before output turns OFF',
+            pulse: currentLang==='is' ? 'Einn púls þegar inntak kveikir' : 'Single pulse on input rising edge',
+            flash: currentLang==='is' ? 'Úttak blikkar á/af' : 'Output flashes ON/OFF'
+        };
+        html += `<div style="padding:0.2rem 0.5rem;font-size:0.55rem;color:var(--text-muted);font-style:italic">${modeDescs[mode]||''}</div>`;
+        
+        // Status
+        html += `<div class="prop-status">`;
+        html += `<div class="prop-status-dot ${ts.output?'active':''}"></div>`;
+        html += `<span class="prop-status-label">${t.propsOutput}: ${ts.output?'ON':'OFF'}</span>`;
+        html += `</div>`;
+    }
+    // --- COUNTER properties ---
+    else if(comp.type === 'counter'){
+        const cs = getCounterState(comp.io);
+        
+        html += `<div class="prop-section">`;
+        html += `<div class="prop-section-title">${t.propsSettings}</div>`;
+        
+        // Counter number
+        const cNum = comp.io ? parseInt(comp.io.replace(/\D/g,'')) : 1;
+        html += `<div class="prop-row"><span class="prop-label">${t.propsAddress}</span>`;
+        html += `<select class="prop-select" onchange="propSetIODirect(${ni},${ci},'${row}','C'+this.value)">`;
+        for(let n=1; n<=8; n++){
+            html += `<option value="${n}" ${cNum===n?'selected':''}>C${n}</option>`;
+        }
+        html += `</select></div>`;
+        
+        // PV slider + input
+        html += `<div class="prop-row"><span class="prop-label">PV (${t.propsPreset})</span>`;
+        html += `<input type="number" class="prop-input" min="1" max="9999" value="${cs.preset}" onchange="propSetCounterPV('${comp.io}',+this.value)"></div>`;
+        html += `<div class="prop-slider-row"><input type="range" class="prop-slider purple" min="1" max="100" value="${Math.min(cs.preset,100)}" oninput="propSetCounterPV('${comp.io}',+this.value)"></div>`;
+        
+        // CV display
+        html += `<div class="prop-row"><span class="prop-label">CV (${t.propsCurrent})</span>`;
+        html += `<span class="prop-value" style="color:${cs.output?'var(--success)':'var(--purple)'}">${cs.cv}</span></div>`;
+        html += `</div>`;
+        
+        // Status
+        html += `<div class="prop-status">`;
+        html += `<div class="prop-status-dot ${cs.output?'active':''}"></div>`;
+        html += `<span class="prop-status-label">CV ${cs.cv} >= PV ${cs.preset} → ${cs.output?'ON':'OFF'}</span>`;
+        html += `</div>`;
+    }
+    // --- CONTACT properties ---
+    else if(comp.type.startsWith('contact')){
+        const val = getState(comp.io);
+        const ioType = comp.io ? (comp.io[0]==='i'?'i':comp.io[0]) : 'i';
+        const ioNum = comp.io ? parseInt(comp.io.replace(/\D/g,'')) : 1;
+        
+        html += `<div class="prop-section">`;
+        html += `<div class="prop-section-title">${t.propsSettings}</div>`;
+        
+        // Type toggle NO/NC
+        html += `<div class="prop-row"><span class="prop-label">${t.propsType}</span>`;
+        html += `<select class="prop-select" onchange="propSetContactType(${ni},${ci},'${row}',this.value)">`;
+        html += `<option value="contact-make" ${comp.type==='contact-make'?'selected':''}>NO (Make)</option>`;
+        html += `<option value="contact-break" ${comp.type==='contact-break'?'selected':''}>NC (Break)</option>`;
+        html += `</select></div>`;
+        
+        // IO Type dropdown (i, M, T, C, A)
+        html += `<div class="prop-row"><span class="prop-label">${t.propsAddress}</span>`;
+        html += `<select class="prop-select" style="min-width:55px" onchange="propSetIO(${ni},${ci},'${row}',this.value,${ioNum})">`;
+        html += `<option value="i" ${ioType==='i'?'selected':''}>i (Input)</option>`;
+        html += `<option value="M" ${ioType==='M'?'selected':''}>M (Marker)</option>`;
+        html += `<option value="T" ${ioType==='T'?'selected':''}>T (Timer)</option>`;
+        html += `<option value="C" ${ioType==='C'?'selected':''}>C (Counter)</option>`;
+        html += `<option value="Q" ${ioType==='Q'?'selected':''}>Q (Output)</option>`;
+        html += `</select>`;
+        
+        // IO Number dropdown
+        const maxNums = {i:16, M:16, T:8, C:8, Q:12};
+        const max = maxNums[ioType] || 8;
+        html += `<select class="prop-select" style="min-width:45px;margin-left:4px" onchange="propSetIONum(${ni},${ci},'${row}','${ioType}',+this.value)">`;
+        for(let n=1; n<=max; n++){
+            html += `<option value="${n}" ${ioNum===n?'selected':''}>${n}</option>`;
+        }
+        html += `</select></div>`;
+        html += `</div>`;
+        
+        // Status
+        html += `<div class="prop-status">`;
+        html += `<div class="prop-status-dot ${val?'active':''}"></div>`;
+        html += `<span class="prop-status-label">${comp.io}: ${val?'ON':'OFF'}</span>`;
+        html += `</div>`;
+    }
+    // --- COIL properties ---
+    else if(comp.type.startsWith('coil')){
+        const val = getState(comp.io);
+        const ioType = comp.io ? (comp.io[0]==='i'?'i':comp.io[0]) : 'Q';
+        const ioNum = comp.io ? parseInt(comp.io.replace(/\D/g,'')) : 1;
+        
+        html += `<div class="prop-section">`;
+        html += `<div class="prop-section-title">${t.propsSettings}</div>`;
+        
+        // Type toggle Coil/SET/RESET
+        html += `<div class="prop-row"><span class="prop-label">${t.propsType}</span>`;
+        html += `<select class="prop-select" onchange="propSetCoilType(${ni},${ci},'${row}',this.value)">`;
+        html += `<option value="coil-normal" ${comp.type==='coil-normal'?'selected':''}>Coil ( )</option>`;
+        html += `<option value="coil-set" ${comp.type==='coil-set'?'selected':''}>SET (S)</option>`;
+        html += `<option value="coil-reset" ${comp.type==='coil-reset'?'selected':''}>RESET (R)</option>`;
+        html += `</select></div>`;
+        
+        // IO Type dropdown (Q, M)
+        html += `<div class="prop-row"><span class="prop-label">${t.propsAddress}</span>`;
+        html += `<select class="prop-select" style="min-width:55px" onchange="propSetIO(${ni},${ci},'${row}',this.value,${ioNum})">`;
+        html += `<option value="Q" ${ioType==='Q'?'selected':''}>Q (Output)</option>`;
+        html += `<option value="M" ${ioType==='M'?'selected':''}>M (Marker)</option>`;
+        html += `</select>`;
+        
+        // IO Number dropdown
+        const maxNums = {Q:12, M:16};
+        const max = maxNums[ioType] || 4;
+        html += `<select class="prop-select" style="min-width:45px;margin-left:4px" onchange="propSetIONum(${ni},${ci},'${row}','${ioType}',+this.value)">`;
+        for(let n=1; n<=max; n++){
+            html += `<option value="${n}" ${ioNum===n?'selected':''}>${n}</option>`;
+        }
+        html += `</select></div>`;
+        html += `</div>`;
+        
+        // Status
+        html += `<div class="prop-status">`;
+        html += `<div class="prop-status-dot ${val?'active':''}"></div>`;
+        html += `<span class="prop-status-label">${comp.io}: ${val?'ON':'OFF'}</span>`;
+        html += `</div>`;
+    }
+    
+    // Location info og delete
+    html += `<div class="prop-btn-row">`;
+    html += `<span class="prop-btn" style="cursor:default;pointer-events:none;">N${ni+1} : ${row} [${ci}]</span>`;
+    html += `<span class="prop-btn danger" onclick="propDeleteComponent()">${t.propsDelete} 🗑️</span>`;
+    html += `</div>`;
+    
+    html += `</div>`;
+    container.innerHTML = html;
+}
+
+// Property setter functions
+function propSetCompareInput(io, val){ getCompareState(io).input = val; renderLadder(); updatePropsPanel(); }
+
+function propSetAnalog(ia, val){
+    val = Math.max(0, Math.min(1000, val));
+    analogState[ia] = val;
+    // Uppfæra slider og val display í IO panelinu
+    const slider = document.getElementById('analog-'+ia);
+    if(slider) slider.value = val;
+    document.getElementById('analog-val-'+ia).textContent = val;
+    renderLadder();
+    updatePropsPanel();
+}
+function propSetCompareOp(io, val){ getCompareState(io).op = val; renderLadder(); updatePropsPanel(); }
+function propSetCompareThreshold(io, val){ getCompareState(io).threshold = Math.max(0,Math.min(1000,val)); renderLadder(); updatePropsPanel(); }
+function propSetCompareInput2Type(io, val){
+    const cps = getCompareState(io);
+    if(val === 'const'){
+        cps.input2Type = 'const';
+    } else {
+        // val er IA1-IA4
+        cps.input2Type = 'analog';
+        cps.input2 = val;
+    }
+    renderLadder(); updatePropsPanel();
+}
+function propSetTimerPT(io, val){ getTimerState(io).preset = Math.max(500,Math.min(getMaxPreset(getTimerState(io).timeFormat),val)); renderLadder(); updatePropsPanel(); }
+function propSetTimerMode(io, val){
+    const ts = getTimerState(io);
+    ts.mode = val;
+    ts.elapsed = 0;
+    ts.output = false;
+    ts.flashState = false;
+    ts.lastInput = false;
+    renderLadder(); updatePropsPanel();
+}
+function propSetTimerFormat(io, val){
+    const ts = getTimerState(io);
+    const oldFmt = ts.timeFormat;
+    ts.timeFormat = val;
+    // Clamp preset til nýs formats
+    const maxPT = getMaxPreset(val);
+    ts.preset = Math.min(ts.preset, maxPT);
+    if(ts.preset < 500) ts.preset = val === 'hhmm' ? 60000 : val === 'mmss' ? 1000 : 500;
+    renderLadder(); updatePropsPanel();
+}
+function propSetTimerMMSS(io, mm, ss){
+    const ts = getTimerState(io);
+    ts.preset = (mm * 60 + ss) * 1000;
+    if(ts.preset < 1000) ts.preset = 1000;
+    renderLadder(); updatePropsPanel();
+}
+function propSetTimerHHMM(io, hh, mm){
+    const ts = getTimerState(io);
+    ts.preset = (hh * 60 + mm) * 60000;
+    if(ts.preset < 60000) ts.preset = 60000;
+    renderLadder(); updatePropsPanel();
+}
+function propSetTimerType(ni,ci,row,val){
+    let comp;
+    if(row?.startsWith('branch-')){const bi=parseInt(row.split('-')[1]);comp=networks[ni].branches?.[bi]?.cells?.[ci];}
+    else{comp=networks[ni].mainCells[ci];}
+    if(comp)comp.type=val; renderLadder(); updatePropsPanel();
+}
+function propSetContactType(ni,ci,row,val){ propSetTimerType(ni,ci,row,val); }
+function propSetCoilType(ni,ci,row,val){ propSetTimerType(ni,ci,row,val); }
+
+// Breyta IO type (i, M, Q, T, C) á íhlut
+function propSetIO(ni,ci,row,newType,num){
+    let comp;
+    if(row?.startsWith('branch-')){const bi=parseInt(row.split('-')[1]);comp=networks[ni].branches?.[bi]?.cells?.[ci];}
+    else{comp=networks[ni].mainCells[ci];}
+    if(!comp) return;
+    // Clamp number
+    const maxNums = {i:16, M:16, T:8, C:8, Q:12, A:8};
+    const max = maxNums[newType] || 8;
+    const n = Math.min(Math.max(1,num), max);
+    comp.io = newType + n;
+    renderLadder(); moveCursor(ni,ci,row);
+}
+
+// Breyta IO number á íhlut
+function propSetIONum(ni,ci,row,ioType,num){
+    propSetIO(ni,ci,row,ioType,num);
+}
+
+// Setja IO beint (t.d. 'T3', 'C2', 'A1')
+function propSetIODirect(ni,ci,row,io){
+    let comp;
+    if(row?.startsWith('branch-')){const bi=parseInt(row.split('-')[1]);comp=networks[ni].branches?.[bi]?.cells?.[ci];}
+    else{comp=networks[ni].mainCells[ci];}
+    if(comp){ comp.io = io; renderLadder(); moveCursor(ni,ci,row); }
+}
+function propSetCounterPV(io, val){ getCounterState(io).preset = Math.max(1,Math.min(9999,val)); renderLadder(); updatePropsPanel(); }
+function propDeleteComponent(){
+    if(!selectedInfo) return;
+    const {network:ni, cell:ci, row} = selectedInfo;
+    const net = networks[ni];
+    if(row?.startsWith('branch-')){
+        const bi = parseInt(row.split('-')[1]);
+        if(net.branches?.[bi]) net.branches[bi].cells[ci]=null;
+    } else if(row?.startsWith('counter-')){
+        const lineType = row.replace('counter-','');
+        if(net.counter) net.counter[lineType+'Cells'][ci]=null;
+    } else {
+        const comp = net.mainCells[ci];
+        if(comp?.type === 'counter') net.counter = null;
+        net.mainCells[ci]=null;
+    }
+    selectedComponent=null; selectedInfo=null;
+    renderLadder(); updatePropsPanel();
+}
+function navigateToCell(ni,ci,row){
+    moveCursor(ni,ci,row);
+    return !!document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="${row}"].cell-component`);
+}
+function moveCursor(ni,ci,row){
+    cursorInfo = {network:ni, cell:ci, row:row};
+    
+    // Færa ▼ cursor CSS class
+    document.querySelectorAll('.ladder-cell.cursor, .branch-cell.cursor, .counter-line-cell.cursor').forEach(c=>c.classList.remove('cursor'));
+    const targetCell = document.querySelector(`.ladder-cell[data-network="${ni}"][data-cell="${ci}"][data-row="${row}"], .branch-cell[data-network="${ni}"][data-cell="${ci}"][data-row="${row}"], .counter-line-cell[data-network="${ni}"][data-cell="${ci}"][data-row="${row}"]`);
+    if(targetCell) targetCell.classList.add('cursor');
+    
+    // Velja component ef til
+    document.querySelectorAll('.cell-component').forEach(c=>c.classList.remove('selected'));
+    const comp = document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="${row}"].cell-component`);
+    if(comp){
+        selectedComponent=comp; selectedInfo={network:ni,cell:ci,row}; comp.classList.add('selected');
+        
+    } else {
+        selectedComponent=null; selectedInfo=null;
+    }
+    updatePropsPanel();
+}
+// Quick-type buffer
+let typeBuffer='';
+let typeTimeout=null;
+function clearTypeBuffer(){typeBuffer='';typeTimeout=null;}
+function processTypeBuffer(){
+    if(!typeBuffer)return;
+    const match=typeBuffer.match(/^([iIMQTCA])(\d{1,2})$/i);
+    if(match){
+        const ioType=match[1].toUpperCase()==='I'?'i':match[1].toUpperCase();
+        const num=parseInt(match[2]);
+        let type,max;
+        if(ioType==='i'){type='contact-make';max=16;}
+        else if(ioType==='M'){type='contact-make';max=16;}
+        else if(ioType==='Q'){type='coil-normal';max=12;}
+        else if(ioType==='T'){type='timer-ton';max=8;}
+        else if(ioType==='C'){type='counter';max=8;}
+        else if(ioType==='A'){type='compare';max=8;}
+        if(num>=1&&num<=max){
+            const io=ioType+num;
+            // Nota cursor stað ef til, annars síðasta network
+            let ni = cursorInfo ? cursorInfo.network : networks.length-1;
+            let targetCell = cursorInfo ? cursorInfo.cell : null;
+            let targetRow = cursorInfo ? cursorInfo.row : 'main';
+            const net=networks[ni];
+            const isCoil=ioType==='Q';
+            
+            // Ef cursor er á output reit (cell 4) og M er skrifað, setja coil
+            if(cursorInfo && targetCell===6 && targetRow==='main' && ioType==='M'){
+                net.mainCells[6]={type:'coil-normal',io};
+                moveCursor(ni,6,'main');
+            }else if(isCoil){
+                // Q fer í output reit (cell 4) - yfirskrifa ef til
+                if(!net.mainCells[6] || (cursorInfo && targetCell===6)){
+                    net.mainCells[6]={type,io};
+                    moveCursor(ni,6,'main');
+                }
+            }else if(cursorInfo && targetRow==='main' && targetCell!==null && targetCell<6){
+                // Setja á cursor stað (T, i, M) - yfirskrifa ef til
+                net.mainCells[targetCell]={type:ioType==='M'?'contact-make':type,io};
+                const nextCell = targetCell<5 ? targetCell+1 : targetCell;
+                moveCursor(ni,nextCell,'main');
+            }else if(cursorInfo && targetRow?.startsWith('branch-') && net.branches){
+                // Setja í branch á cursor stað
+                const bi = parseInt(targetRow.split('-')[1]);
+                if(net.branches[bi]){
+                    if(!net.branches[bi].cells[targetCell]) net.branches[bi].cells[targetCell]={};
+                    net.branches[bi].cells[targetCell]={type:ioType==='M'?'contact-make':type,io};
+                    moveCursor(ni,targetCell,targetRow);
+                }
+            }else if(ioType==='M'){
+                // M - finna fyrsta lausa, eða fara í output sem coil
+                let placed=false;
+                for(let ci=0;ci<6;ci++){
+                    if(!net.mainCells[ci]){
+                        net.mainCells[ci]={type:'contact-make',io};
+                        moveCursor(ni,ci<5?ci+1:ci,'main');
+                        placed=true;
+                        break;
+                    }
+                }
+                if(!placed&&!net.mainCells[6]){
+                    net.mainCells[6]={type:'coil-normal',io};
+                    moveCursor(ni,6,'main');
+                }
+            }else if(ioType==='T'){
+                // T - finna fyrsta lausa reit
+                for(let ci=0;ci<6;ci++){
+                    if(!net.mainCells[ci]){
+                        net.mainCells[ci]={type,io};
+                        moveCursor(ni,ci<5?ci+1:ci,'main');
+                        break;
+                    }
+                }
+            }else if(ioType==='A'){
+                // A - compare, setja á cursor stað eða fyrsta lausa
+                if(cursorInfo && targetRow==='main' && targetCell!==null && targetCell<6){
+                    net.mainCells[targetCell]={type,io};
+                    const nextCell = targetCell<5 ? targetCell+1 : targetCell;
+                    moveCursor(ni,nextCell,'main');
+                } else {
+                    for(let ci=0;ci<6;ci++){
+                        if(!net.mainCells[ci]){
+                            net.mainCells[ci]={type,io};
+                            moveCursor(ni,ci<5?ci+1:ci,'main');
+                            break;
+                        }
+                    }
+                }
+            }else if(ioType==='C'){
+                // C - counter, setja á cursor stað eða fyrsta lausa
+                if(cursorInfo && targetRow==='main' && targetCell!==null && targetCell<4 && !net.counter){
+                    addCounter(ni, targetCell, io);
+                } else if(!net.counter) {
+                    for(let ci=0;ci<6;ci++){
+                        if(!net.mainCells[ci]){
+                            addCounter(ni, ci, io);
+                            break;
+                        }
+                    }
+                }
+            }else{
+                // i - finna fyrsta lausa contact reit
+                for(let ci=0;ci<6;ci++){
+                    if(!net.mainCells[ci]){
+                        net.mainCells[ci]={type,io};
+                        moveCursor(ni,ci<5?ci+1:ci,'main');
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    renderLadder();
+    clearTypeBuffer();
+}
+function setupKeyboardShortcuts(){
+    document.addEventListener('keydown',e=>{
+        if(e.target.tagName==='INPUT')return;
+        // Quick-type: skrifa i1, M2, M12, Q1 osfrv.
+        if(!e.ctrlKey&&!e.altKey&&!e.metaKey){
+            const key=e.key;
+            // Byrja á bókstaf (i, m, q, t)
+            if(/^[iImMqQtTaAcC]$/.test(key)&&typeBuffer===''){
+                e.preventDefault();
+                typeBuffer=key;
+                if(typeTimeout)clearTimeout(typeTimeout);
+                typeTimeout=setTimeout(clearTypeBuffer,1500);
+                return;
+            }
+            // Halda áfram með tölu
+            if(/^[0-9]$/.test(key)&&/^[iImMqQtTaAcC]\d?$/.test(typeBuffer)){
+                e.preventDefault();
+                typeBuffer+=key;
+                // Ef M og fyrsta tala er 1, bíða eftir annari tölu (M10-M16)
+                const isM = /^[mM]/.test(typeBuffer);
+                const hasOneDigit = /^[iImMqQtTaAcC]\d$/.test(typeBuffer);
+                const hasTwoDigits = /^[iImMqQtTaAcC]\d\d$/.test(typeBuffer);
+                if(hasTwoDigits){
+                    processTypeBuffer();
+                }else if(hasOneDigit){
+                    if(isM && typeBuffer[1]==='1'){
+                        // M1 - bíða aðeins eftir annarri tölu (gæti verið M10-M16)
+                        if(typeTimeout)clearTimeout(typeTimeout);
+                        typeTimeout=setTimeout(processTypeBuffer,400);
+                    }else{
+                        // Aðrar tölur - vinna strax
+                        processTypeBuffer();
+                    }
+                }
+                return;
+            }
+        }
+        // N fyrir nýtt network
+        if((e.key==='n'||e.key==='N')&&typeBuffer===''){e.preventDefault();addNetwork();cursorInfo={network:networks.length-1,cell:0,row:'main'};renderLadder();return;}
+        // Örvar til að fara á milli - virkar með cursor eða selection
+        const navInfo = cursorInfo || selectedInfo;
+        if(navInfo&&(e.code==='ArrowLeft'||e.code==='ArrowRight'||e.code==='ArrowUp'||e.code==='ArrowDown')){
+            e.preventDefault();
+            clearTypeBuffer();
+            const{network:ni,cell:ci,row}=navInfo;
+            const net=networks[ni];
+            const branches = net.branches || [];
+            const firstBranch = branches[0];
+            
+            if(e.code==='ArrowLeft'){
+                let minCell = 0;
+                if(row?.startsWith('branch-') && firstBranch){
+                    minCell = firstBranch.afterCell + 1;
+                } else if(row?.startsWith('counter-') && net.counter){
+                    minCell = net.counter.cell;
+                }
+                if(ci > minCell) moveCursor(ni, ci-1, row);
+            }else if(e.code==='ArrowRight'){
+                let maxCell = 6;
+                if(row === 'main'){
+                    maxCell = 6;
+                } else if(row?.startsWith('branch-') && firstBranch){
+                    maxCell = firstBranch.returnAfterCell;
+                } else if(row?.startsWith('counter-') && net.counter){
+                    maxCell = net.counter.cell;
+                }
+                if(ci < maxCell) moveCursor(ni, ci+1, row);
+            }else if(e.code==='ArrowUp'){
+                if(row?.startsWith('branch-')){
+                    const bi = parseInt(row.split('-')[1]);
+                    if(bi > 0){
+                        // Fara upp í fyrri branch
+                        moveCursor(ni, ci, 'branch-'+(bi-1));
+                    } else {
+                        // Fara upp í main
+                        moveCursor(ni, ci, 'main');
+                    }
+                } else if(row === 'counter-r' && net.counter){
+                    moveCursor(ni, ci, 'counter-d');
+                } else if(row === 'counter-d' && net.counter){
+                    moveCursor(ni, ci, 'main');
+                } else if(row === 'main' && ni > 0){
+                    moveCursor(ni-1, ci, 'main');
+                }
+            }else if(e.code==='ArrowDown'){
+                if(row === 'main'){
+                    // Athuga hvort við getum farið í branch eða counter
+                    if(branches.length > 0 && firstBranch && ci > firstBranch.afterCell && ci <= firstBranch.returnAfterCell){
+                        moveCursor(ni, ci, 'branch-0');
+                    } else if(net.counter && ci === net.counter.cell){
+                        moveCursor(ni, ci, 'counter-d');
+                    } else if(ni < networks.length - 1){
+                        moveCursor(ni+1, ci, 'main');
+                    }
+                } else if(row?.startsWith('branch-')){
+                    const bi = parseInt(row.split('-')[1]);
+                    if(bi < branches.length - 1){
+                        // Fara niður í næstu branch
+                        moveCursor(ni, ci, 'branch-'+(bi+1));
+                    } else if(ni < networks.length - 1){
+                        moveCursor(ni+1, ci, 'main');
+                    }
+                } else if(row === 'counter-d' && net.counter){
+                    moveCursor(ni, ci, 'counter-r');
+                } else if(row === 'counter-r'){
+                    if(ni < networks.length - 1){
+                        moveCursor(ni+1, ci, 'main');
+                    }
+                }
+            }
+            return;
+        }
+        if(!selectedComponent||!selectedInfo)return;
+        const{network:ni,cell:ci,row}=selectedInfo,net=networks[ni];
+        // Finna comp frá branches ef þarf
+        let comp;
+        if(row?.startsWith('branch-')){
+            const bi = parseInt(row.split('-')[1]);
+            comp = net.branches?.[bi]?.cells?.[ci];
+        } else {
+            comp = net.mainCells[ci];
+        }
+        if(!comp)return;
+        const isCoil=comp.type.startsWith('coil'),isTimer=comp.type.startsWith('timer'),isContact=comp.type.startsWith('contact'),isCompare=comp.type==='compare';
+        const reselect=()=>{renderLadder();moveCursor(ni,ci,row);};
+        if(e.code==='Space'){e.preventDefault();if(isContact)comp.type=comp.type==='contact-make'?'contact-break':'contact-make';else if(isCoil){const t=['coil-normal','coil-set','coil-reset'];comp.type=t[(t.indexOf(comp.type)+1)%3];}else if(isTimer){const ts=getTimerState(comp.io);const modes=['ton','tof','pulse','flash'];ts.mode=modes[(modes.indexOf(ts.mode||'ton')+1)%4];ts.elapsed=0;ts.output=false;ts.flashState=false;}else if(isCompare){const cps=getCompareState(comp.io);const ops=['>=','<=','>','<','==','!='];cps.op=ops[(ops.indexOf(cps.op)+1)%ops.length];}reselect();}
+        if(e.code==='Delete'||e.code==='Backspace'){
+            e.preventDefault();
+            if(row?.startsWith('branch-')){
+                const bi = parseInt(row.split('-')[1]);
+                if(net.branches?.[bi]) net.branches[bi].cells[ci]=null;
+            } else if(row?.startsWith('counter-')){
+                const lineType = row.replace('counter-','');
+                if(net.counter) net.counter[lineType+'Cells'][ci]=null;
+            } else {
+                // Ef counter, eyða líka counter structure
+                if(comp.type === 'counter') net.counter = null;
+                net.mainCells[ci]=null;
+            }
+            selectedComponent=null;selectedInfo=null;renderLadder();
+        }
+        // + á branch línu bætir við nýrri parallel línu
+        if((e.key==='+'||e.key==='=')&&isContact){
+            e.preventDefault();
+            if(row==='main' && ci<6){
+                addBranch(ni,ci);
+            } else if(row?.startsWith('branch-')){
+                addParallelBranch(ni);
+            }
+        }
+        // Timer PT adjustment með PageUp/PageDown eða U/D
+        if(isTimer && comp.io){
+            const ts = getTimerState(comp.io);
+            const step = getPresetStep(ts.timeFormat);
+            const maxPT = getMaxPreset(ts.timeFormat);
+            if(e.code==='PageUp'||e.key==='u'||e.key==='U'){e.preventDefault();ts.preset=Math.min(ts.preset+step,maxPT);reselect();}
+            if(e.code==='PageDown'||e.key==='d'||e.key==='D'){e.preventDefault();ts.preset=Math.max(ts.preset-step,step);reselect();}
+        }
+        // Compare threshold adjustment með U/D og input switching með I
+        if(isCompare && comp.io){
+            const cps = getCompareState(comp.io);
+            if(e.code==='PageUp'||e.key==='u'||e.key==='U'){e.preventDefault();cps.threshold=Math.min(cps.threshold+50,1000);reselect();}
+            if(e.code==='PageDown'||e.key==='d'||e.key==='D'){e.preventDefault();cps.threshold=Math.max(cps.threshold-50,0);reselect();}
+            // I til að skipta um analog input (IA1→IA2→IA3→IA4→IA1)
+            if(e.key==='i'||e.key==='I'){e.preventDefault();const inputs=['IA1','IA2','IA3','IA4'];cps.input=inputs[(inputs.indexOf(cps.input)+1)%4];reselect();}
+        }
+    });
+    document.addEventListener('click',e=>{if(!e.target.closest('.cell-component')&&!e.target.closest('.ladder-cell')&&!e.target.closest('.branch-cell')&&!e.target.closest('.counter-line-cell')&&!e.target.closest('.branch-btn')&&!e.target.closest('.sim-sidebar')&&!e.target.closest('.analog-slider-wrapper')&&!e.target.closest('.analog-group')){selectedAnalog=null;document.querySelectorAll('.analog-slider-wrapper').forEach(w=>w.classList.remove('selected'));clearSelection();}});
+}
+function toggleInput(btn){const inp=btn.dataset.input;if(activeSimTab==='conveyor'&&['i3','i4','i5'].includes(inp))return;if(activeSimTab==='tank'&&['i3','i4','i5','i6'].includes(inp))return;inputState[inp]=!inputState[inp];btn.classList.toggle('active',inputState[inp]);}
+function updateDisplay(){
+    Object.keys(inputState).forEach(i=>{const btn=document.querySelector(`[data-input="${i}"]`);if(btn)btn.classList.toggle('active',inputState[i]);});
+    Object.keys(outputState).forEach(o=>document.getElementById('output-'+o)?.classList.toggle('active',outputState[o]));
+    Object.keys(markerState).forEach(m=>document.getElementById('marker-'+m)?.classList.toggle('active',markerState[m]));
+}
+function toggleSimulation(){
+    isRunning=!isRunning;
+    const btn=document.getElementById('run-btn'),ind=document.getElementById('running-indicator');
+    const t = translations[currentLang];
+    if(isRunning){btn.innerHTML=t.stop;btn.classList.replace('btn-success','btn-danger');ind.classList.add('active');simulationInterval=setInterval(simulate,100);}
+    else{btn.innerHTML=t.run;btn.classList.replace('btn-danger','btn-success');ind.classList.remove('active');clearInterval(simulationInterval);clearStates();stopConveyorAnimation();}
+}
+function stopConveyorAnimation(){
+    const belt=document.getElementById('conveyor-belt');
+    if(belt){belt.classList.remove('running','reverse');}
+    document.getElementById('motor-fwd')?.classList.remove('active');
+    document.getElementById('motor-rev')?.classList.remove('active','reverse');
+    document.getElementById('conv-light-r')?.classList.remove('active-r');
+    document.getElementById('conv-light-y')?.classList.remove('active-y');
+    document.getElementById('conv-light-g')?.classList.remove('active-g');
+}
+function getState(io){if(!io)return false;if(io[0]==='i')return inputState[io]||false;if(io[0]==='M')return markerState[io]||false;if(io[0]==='Q')return outputState[io]||false;if(io[0]==='T')return timerState[io]?.output||false;if(io[0]==='C')return counterState[io]?.output||false;if(io[0]==='A')return compareState[io]?.output||false;return false;}
+function setState(io,val,set=false,reset=false){
+    if(io[0]==='M'){if(set){latchedMarkers[io]=true;markerState[io]=true;}else if(reset){latchedMarkers[io]=false;markerState[io]=false;}else markerState[io]=val;}
+    else if(io[0]==='Q'){if(set){latchedOutputs[io]=true;outputState[io]=true;}else if(reset){latchedOutputs[io]=false;outputState[io]=false;}else outputState[io]=val;}
+}
+function evalContact(comp){if(!comp)return true;const v=getState(comp.io);return comp.type==='contact-make'?v:!v;}
+
+// Evaluate analog compare
+function evalCompare(op, val, threshold){
+    switch(op){
+        case '>': return val > threshold;
+        case '<': return val < threshold;
+        case '>=': return val >= threshold;
+        case '<=': return val <= threshold;
+        case '==': return val === threshold;
+        case '!=': return val !== threshold;
+        default: return false;
+    }
+}
+
+// Evaluate component - contact, timer, counter eða compare
+function evalComponent(comp, inputActive) {
+    if(!comp) return inputActive; // Tómur reitur - láta straum flæða
+    
+    // Compare - analog compare blokk
+    if(comp.type === 'compare') {
+        const cps = getCompareState(comp.io);
+        const iaVal = analogState[cps.input] || 0;
+        const val2 = getCompareVal2(cps);
+        cps.output = evalCompare(cps.op, iaVal, val2);
+        return inputActive && cps.output; // Þarf bæði input OG compare satt
+    }
+    
+    // Timer - virkar sem inline block
+    if(comp.type?.startsWith('timer')) {
+        const ts = getTimerState(comp.io);
+        const mode = ts.mode || 'ton';
+        
+        if(mode === 'ton'){
+            if(inputActive) {
+                ts.elapsed = Math.min(ts.elapsed + 100, ts.preset);
+                ts.output = ts.elapsed >= ts.preset;
+            } else {
+                ts.elapsed = 0;
+                ts.output = false;
+            }
+        } else if(mode === 'tof'){
+            if(inputActive) {
+                ts.elapsed = ts.preset;
+                ts.output = true;
+            } else {
+                ts.elapsed = Math.max(ts.elapsed - 100, 0);
+                ts.output = ts.elapsed > 0;
+            }
+        } else if(mode === 'pulse'){
+            // Single pulse: rising edge startar timer, output ON meðan timer rennur
+            const risingEdge = inputActive && !ts.lastInput;
+            ts.lastInput = inputActive;
+            if(risingEdge){
+                ts.elapsed = 0;
+                ts.output = true;
+            }
+            if(ts.output){
+                ts.elapsed = Math.min(ts.elapsed + 100, ts.preset);
+                if(ts.elapsed >= ts.preset) ts.output = false;
+            }
+        } else if(mode === 'flash'){
+            // Flashing: output togglar á/af með preset tíma
+            if(inputActive){
+                ts.elapsed += 100;
+                if(ts.elapsed >= ts.preset){
+                    ts.elapsed = 0;
+                    ts.flashState = !ts.flashState;
+                }
+                ts.output = ts.flashState;
+            } else {
+                ts.elapsed = 0;
+                ts.output = false;
+                ts.flashState = false;
+            }
+        }
+        return ts.output;
+    }
+    
+    // Counter - virkar sem inline block
+    if(comp.type === 'counter') {
+        const cs = getCounterState(comp.io);
+        // Finna network til að fá D og R stöðu
+        let dActive = false, rActive = false;
+        for(let ni=0; ni<networks.length; ni++){
+            if(networks[ni].counter?.io === comp.io){
+                dActive = networks[ni].counter.dActive || false;
+                rActive = networks[ni].counter.rActive || false;
+                break;
+            }
+        }
+        
+        // Counter logic
+        if(rActive){
+            cs.cv = 0;
+            cs.output = false;
+        } else if(inputActive) {
+            // C púls - rising edge
+            if(!cs.lastC){
+                if(dActive){
+                    // D er ON - telja niður
+                    cs.cv = Math.max(0, cs.cv - 1);
+                } else {
+                    // D er OFF - telja upp
+                    cs.cv++;
+                }
+            }
+        }
+        cs.lastC = inputActive;
+        cs.output = cs.cv >= cs.preset;
+        
+        return cs.output; // Counter lætur straum flæða ef CV >= PV
+    }
+    
+    // Contact - venjuleg rökfræði
+    const v = getState(comp.io);
+    return comp.type === 'contact-make' ? v : !v;
+}
+
+function simulate(){
+    Object.keys(outputState).forEach(o=>outputState[o]=latchedOutputs[o]);
+    Object.keys(markerState).forEach(m=>markerState[m]=latchedMarkers[m]);
+    document.querySelectorAll('.cell-component').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('.power-rail').forEach(r=>r.classList.remove('active'));
+    document.querySelectorAll('svg line').forEach(l=>l.classList.remove('active'));
+    
+    networks.forEach((net,ni)=>{
+        const branches = net.branches || [];
+        let currentActive = true;
+        
+        // Counter input evaluation
+        if(net.counter){
+            const cnt = net.counter;
+            const cs = getCounterState(cnt.io);
+            
+            // C (count) lína - efsta lína (main) fram að counter
+            // Þetta er reiknað í evalComponent þegar við förum í gegnum main cells
+            
+            // D (direction/down) lína - bara einn reitur
+            let dActive = false;
+            const dComp = cnt.dCells?.[cnt.cell];
+            if(dComp){
+                dActive = evalComponent(dComp, true);
+            }
+            
+            // R (reset) lína - bara einn reitur
+            let rActive = false;
+            const rComp = cnt.rCells?.[cnt.cell];
+            if(rComp){
+                rActive = evalComponent(rComp, true);
+            }
+            
+            // Store active states
+            cnt.dActive = dActive;
+            cnt.rActive = rActive;
+        }
+        
+        if(branches.length > 0){
+            const firstBranch = branches[0];
+            
+            // Fyrir branch start
+            for(let ci=0; ci<=firstBranch.afterCell; ci++){
+                currentActive = evalComponent(net.mainCells[ci], currentActive);
+                if(currentActive && net.mainCells[ci]) document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="main"].cell-component`)?.classList.add('active');
+            }
+            let beforeBranchActive = currentActive;
+            
+            // Main path
+            let mainPathActive = beforeBranchActive;
+            for(let ci=firstBranch.afterCell+1; ci<=firstBranch.returnAfterCell; ci++){
+                mainPathActive = evalComponent(net.mainCells[ci], mainPathActive);
+                if(mainPathActive && net.mainCells[ci]) document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="main"].cell-component`)?.classList.add('active');
+            }
+            
+            // Allar branch paths (OR saman)
+            let anyBranchActive = false;
+            branches.forEach((branch, bi) => {
+                let branchPathActive = beforeBranchActive;
+                for(let ci=branch.afterCell+1; ci<=branch.returnAfterCell; ci++){
+                    branchPathActive = evalComponent(branch.cells?.[ci], branchPathActive);
+                    if(branchPathActive && branch.cells?.[ci]) document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="branch-${bi}"].cell-component`)?.classList.add('active');
+                }
+                if(branchPathActive) anyBranchActive = true;
+            });
+            
+            currentActive = mainPathActive || anyBranchActive;
+            
+            // Eftir branches
+            for(let ci=firstBranch.returnAfterCell+1; ci<6; ci++){
+                currentActive = evalComponent(net.mainCells[ci], currentActive);
+                if(currentActive && net.mainCells[ci]) document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="main"].cell-component`)?.classList.add('active');
+            }
+            
+            if(currentActive){
+                for(let ci=0;ci<=6;ci++){
+                    document.getElementById(`wire-main-${ni}-${ci}`)?.classList.add('active');
+                    document.querySelectorAll(`.wire-main-${ni}-${ci}`).forEach(l=>l.classList.add('active'));
+                }
+                document.getElementById(`rail-left-${ni}`)?.classList.add('active');
+                document.getElementById(`rail-right-${ni}`)?.classList.add('active');
+            }
+            if(beforeBranchActive && anyBranchActive){
+                document.querySelectorAll(`.wire-branch-${ni}`).forEach(l=>l.classList.add('active'));
+            }
+        } else {
+            for(let ci=0; ci<6; ci++){
+                currentActive = evalComponent(net.mainCells[ci], currentActive);
+                if(currentActive && net.mainCells[ci]) document.querySelector(`[data-network="${ni}"][data-cell="${ci}"][data-row="main"].cell-component`)?.classList.add('active');
+            }
+            if(currentActive){
+                for(let ci=0;ci<=6;ci++){
+                    document.getElementById(`wire-main-${ni}-${ci}`)?.classList.add('active');
+                    // Fyrir brotnar línur (timer)
+                    document.querySelectorAll(`.wire-main-${ni}-${ci}`).forEach(l=>l.classList.add('active'));
+                }
+                document.getElementById(`rail-left-${ni}`)?.classList.add('active');
+                document.getElementById(`rail-right-${ni}`)?.classList.add('active');
+            }
+        }
+        
+        const out = net.mainCells[6];
+        if(out && currentActive){
+            document.querySelector(`[data-network="${ni}"][data-cell="6"][data-row="main"].cell-component`)?.classList.add('active');
+            if(out.type==='coil-normal') setState(out.io, true);
+            else if(out.type==='coil-set') setState(out.io, true, true);
+            else if(out.type==='coil-reset') setState(out.io, false, false, true);
+        }
+    });
+    updateDisplay();
+    updateTimerDisplays();
+    updateCounterDisplays();
+    updateCompareDisplays();
+    if(activeSimTab==='props') updatePropsPanel();
+    updateSimulation();
+}
+function updateTimerDisplays(){
+    document.querySelectorAll('.cell-component[data-component-type^="timer"]').forEach(el=>{
+        const io=el.dataset.io;
+        if(io&&timerState[io]){
+            const ts=timerState[io];
+            const fmt = ts.timeFormat || 's';
+            const etStr = formatTime(ts.elapsed, fmt);
+            const percent = ts.preset > 0 ? (ts.elapsed / ts.preset) * 100 : 0;
+            const isComplete = ts.output;
+            
+            // Uppfæra ET gildi
+            const etValue = el.querySelector('.timer-row:nth-child(3) .timer-value');
+            if(etValue){
+                etValue.textContent = etStr;
+                etValue.classList.toggle('active', isComplete);
+            }
+            
+            // Uppfæra progress bar
+            const barFill = el.querySelector('.timer-bar-fill');
+            if(barFill){
+                barFill.style.width = percent + '%';
+                barFill.classList.toggle('complete', isComplete);
+            }
+        }
+    });
+}
+function updateCounterDisplays(){
+    document.querySelectorAll('.cell-component[data-component-type="counter"]').forEach(el=>{
+        const io=el.dataset.io;
+        if(io&&counterState[io]){
+            const cs=counterState[io];
+            const percent = cs.preset > 0 ? Math.min((cs.cv / cs.preset) * 100, 100) : 0;
+            const isComplete = cs.output;
+            
+            // Uppfæra CV gildi
+            const cvValue = el.querySelector('.counter-row:nth-child(3) .counter-value');
+            if(cvValue){
+                cvValue.textContent = cs.cv;
+                cvValue.classList.toggle('active', isComplete);
+            }
+            
+            // Uppfæra progress bar
+            const barFill = el.querySelector('.counter-bar-fill');
+            if(barFill){
+                barFill.style.width = percent + '%';
+                barFill.classList.toggle('complete', isComplete);
+            }
+            
+            // Uppfæra input dots
+            const ni = +el.dataset.network;
+            const net = networks[ni];
+            if(net?.counter){
+                el.querySelectorAll('.counter-input-dot').forEach((dot,idx)=>{
+                    const active = idx===0 ? net.counter.cuActive : idx===1 ? net.counter.cdActive : net.counter.rActive;
+                    dot.classList.toggle('active', active);
+                });
+            }
+        }
+    });
+}
+function updateCompareDisplays(){
+    document.querySelectorAll('.cell-component[data-component-type="compare"]').forEach(el=>{
+        const io=el.dataset.io;
+        if(io&&compareState[io]){
+            const cps=compareState[io];
+            const iaVal = analogState[cps.input] || 0;
+            const val2 = getCompareVal2(cps);
+            const percent = Math.min((iaVal / 1000) * 100, 100);
+            const result = cps.output;
+            
+            // Uppfæra gildi
+            const valEl = el.querySelector('.compare-value');
+            if(valEl){
+                valEl.textContent = iaVal;
+                valEl.classList.toggle('active', result);
+            }
+            
+            // Uppfæra operator og val2
+            const opEl = el.querySelector('.compare-op');
+            if(opEl){
+                const val2Label = cps.input2Type === 'analog' ? cps.input2 : cps.threshold;
+                opEl.textContent = `${cps.op} ${val2Label}${cps.input2Type==='analog'?'('+val2+')':''}`;
+            }
+            
+            // Uppfæra bar
+            const barFill = el.querySelector('.compare-bar-fill');
+            if(barFill){
+                barFill.style.width = percent + '%';
+                barFill.classList.toggle('active', result);
+            }
+        }
+    });
+}
+function clearStates(){
+    document.querySelectorAll('.cell-component').forEach(c=>c.classList.remove('active'));
+    document.querySelectorAll('.power-rail').forEach(r=>r.classList.remove('active'));
+    document.querySelectorAll('svg line').forEach(l=>l.classList.remove('active'));
+    Object.keys(outputState).forEach(o=>{outputState[o]=false;latchedOutputs[o]=false;});
+    Object.keys(markerState).forEach(m=>{markerState[m]=false;latchedMarkers[m]=false;});
+    Object.keys(timerState).forEach(t=>{timerState[t].elapsed=0;timerState[t].output=false;timerState[t].flashState=false;timerState[t].lastInput=false;});
+    Object.keys(counterState).forEach(c=>{counterState[c].cv=0;counterState[c].output=false;counterState[c].lastC=false;});
+    Object.keys(compareState).forEach(a=>{compareState[a].output=false;});
+    updateDisplay();renderLadder();
+}
+function clearAll(){if(confirm('Hreinsa allt?')){networks=[];addNetwork();clearStates();}}
+
+// === EXPORT / IMPORT ===
+function generateRex() {
+    // Búa til einstakt rex gildi: timestamp + random streng
+    const timestamp = Date.now().toString(36);
+    const random = Math.random().toString(36).substring(2, 8);
+    return `${timestamp}-${random}`.toUpperCase();
+}
+
+function exportLadder() {
+    // Búa til einstakt rex gildi
+    const rex = generateRex();
+    
+    // Búa til export object
+    const exportData = {
+        version: '1.1',
+        rex: rex,
+        timestamp: new Date().toISOString(),
+        timerPresets: {},
+        comparePresets: {},
+        networks: networks.map((net, i) => ({
+            title: net.title || `Network ${i+1}`,
+            mainCells: net.mainCells.map(cell => cell ? {type: cell.type, io: cell.io} : null),
+            branch: net.branch ? {
+                afterCell: net.branch.afterCell,
+                returnAfterCell: net.branch.returnAfterCell,
+                cells: net.branch.cells.map(cell => cell ? {type: cell.type, io: cell.io} : null)
+            } : null
+        }))
+    };
+    
+    // Vista timer presets
+    Object.keys(timerState).forEach(t => {
+        const ts = timerState[t];
+        exportData.timerPresets[t] = {preset: ts.preset, mode: ts.mode||'ton', timeFormat: ts.timeFormat||'s'};
+    });
+    
+    // Vista compare presets
+    Object.keys(compareState).forEach(a => {
+        const cps = compareState[a];
+        exportData.comparePresets[a] = {input: cps.input, op: cps.op, input2Type: cps.input2Type, input2: cps.input2, threshold: cps.threshold};
+    });
+    
+    // Búa til lesanlegan texta
+    let textOutput = '=== LADDER BUILDER EXPORT ===\n';
+    textOutput += `REX: ${rex}\n`;
+    textOutput += `Dagsetning: ${new Date().toLocaleString('is-IS')}\n`;
+    textOutput += `Version: ${exportData.version}\n\n`;
+    
+    // Timer presets
+    textOutput += '--- TIMER PRESETS ---\n';
+    Object.entries(exportData.timerPresets).forEach(([t, tp]) => {
+        const ptStr = typeof tp === 'number' ? (tp/1000).toFixed(1)+'s' : formatTime(tp.preset, tp.timeFormat||'s');
+        const mode = typeof tp === 'object' ? tp.mode : 'ton';
+        textOutput += `${t}: ${mode.toUpperCase()} ${ptStr}\n`;
+    });
+    textOutput += '\n';
+    
+    // Compare presets
+    textOutput += '--- COMPARE PRESETS ---\n';
+    Object.entries(exportData.comparePresets).forEach(([a, cp]) => {
+        const val2 = cp.input2Type === 'analog' ? cp.input2 : cp.threshold;
+        textOutput += `${a}: ${cp.input} ${cp.op} ${val2}\n`;
+    });
+    textOutput += '\n';
+    
+    // Networks í læsilegu formi
+    exportData.networks.forEach((net, i) => {
+        textOutput += `--- NETWORK ${i+1}: ${net.title} ---\n`;
+        
+        // Main row
+        const mainStr = net.mainCells.map((cell, ci) => {
+            if (!cell) return ci === 6 ? '[    ]' : '[  ]';
+            const sym = cell.type.includes('make') ? '| |' : 
+                       cell.type.includes('break') ? '|/|' :
+                       cell.type.includes('coil-normal') ? '( )' :
+                       cell.type.includes('coil-set') ? '(S)' :
+                       cell.type.includes('coil-reset') ? '(R)' :
+                       cell.type.includes('timer') ? cell.type.replace('timer-','').toUpperCase() :
+                       cell.type === 'compare' ? 'CMP' :
+                       cell.type === 'counter' ? 'CNT' : '???';
+            return `[${sym} ${cell.io}]`;
+        }).join('──');
+        textOutput += `Main:   ${mainStr}\n`;
+        
+        // Branch row
+        if (net.branch) {
+            const branchStr = net.branch.cells.map((cell, ci) => {
+                if (ci <= net.branch.afterCell || ci > net.branch.returnAfterCell) return '     ';
+                if (!cell) return '[  ]';
+                const sym = cell.type.includes('make') ? '| |' : 
+                           cell.type.includes('break') ? '|/|' : '???';
+                return `[${sym} ${cell.io}]`;
+            }).join('──');
+            textOutput += `Branch: ${branchStr}\n`;
+        }
+        textOutput += '\n';
+    });
+    
+    // JSON data (fyrir import)
+    textOutput += '=== JSON DATA (ekki breyta) ===\n';
+    textOutput += JSON.stringify(exportData);
+    textOutput += '\n=== END ===\n';
+    
+    // Hlaða niður
+    const blob = new Blob([textOutput], {type: 'text/plain;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ladder-${new Date().toISOString().slice(0,10)}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function importLadder(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const content = e.target.result;
+            
+            // Finna JSON data í skránni
+            let jsonData;
+            const jsonMatch = content.match(/=== JSON DATA.*?===\s*(\{.*\})/s);
+            if (jsonMatch) {
+                jsonData = JSON.parse(jsonMatch[1]);
+            } else {
+                // Reyna að parse-a sem hreint JSON
+                jsonData = JSON.parse(content);
+            }
+            
+            if (!jsonData || !jsonData.networks) {
+                throw new Error('Ógild LADDER skrá');
+            }
+            
+            // Stoppa simulation ef hún er í gangi
+            if (isRunning) toggleSimulation();
+            
+            // Hreinsa og hlaða inn
+            networks = [];
+            jsonData.networks.forEach(net => {
+                networks.push({
+                    title: net.title || '',
+                    mainCells: net.mainCells.map(cell => cell ? {...cell} : null),
+                    branch: net.branch ? {
+                        afterCell: net.branch.afterCell,
+                        returnAfterCell: net.branch.returnAfterCell,
+                        cells: net.branch.cells.map(cell => cell ? {...cell} : null)
+                    } : null
+                });
+            });
+            
+            // Hlaða timer presets
+            if (jsonData.timerPresets) {
+                Object.entries(jsonData.timerPresets).forEach(([t, tp]) => {
+                    const ts = getTimerState(t);
+                    if(typeof tp === 'number'){
+                        // Gamalt format - bara preset
+                        ts.preset = tp;
+                    } else {
+                        ts.preset = tp.preset || 2000;
+                        ts.mode = tp.mode || 'ton';
+                        ts.timeFormat = tp.timeFormat || 's';
+                    }
+                });
+            }
+            
+            // Hlaða compare presets
+            if (jsonData.comparePresets) {
+                Object.entries(jsonData.comparePresets).forEach(([a, cp]) => {
+                    const cps = getCompareState(a);
+                    if(cp.input) cps.input = cp.input;
+                    if(cp.op) cps.op = cp.op;
+                    if(cp.input2Type) cps.input2Type = cp.input2Type;
+                    if(cp.input2) cps.input2 = cp.input2;
+                    if(cp.threshold !== undefined) cps.threshold = cp.threshold;
+                });
+            }
+            
+            // Endurstilla og birta
+            clearStates();
+            cursorInfo = {network: 0, cell: 0, row: 'main'};
+            renderLadder();
+            
+            // Sýna upplýsingar með rex
+            const rexInfo = jsonData.rex ? `\nREX: ${jsonData.rex}` : '';
+            const dateInfo = jsonData.timestamp ? `\nBúið til: ${new Date(jsonData.timestamp).toLocaleString('is-IS')}` : '';
+            alert(`LADDER hlaðið inn!\n${networks.length} network(s)${rexInfo}${dateInfo}`);
+            
+        } catch (err) {
+            alert('Villa við að lesa skrá: ' + err.message);
+            console.error(err);
+        }
+    };
+    reader.readAsText(file);
+    
+    // Hreinsa input svo hægt sé að velja sömu skrá aftur
+    event.target.value = '';
+}
+// === SIMULATION ===
+function updateSimulation(){if(activeSimTab==='conveyor')updateConveyor();else if(activeSimTab==='traffic')updateTraffic();else if(activeSimTab==='tank')updateTank();updateTankLevel();}
+function convPushInput(inp, down){
+    inputState[inp] = down;
+    const ioBtn = document.querySelector(`[data-input="${inp}"]`);
+    if(ioBtn) ioBtn.classList.toggle('active', down);
+    document.getElementById('conv-btn-s1')?.classList.toggle('active', inputState.i1);
+    document.getElementById('conv-btn-s2')?.classList.toggle('active', inputState.i2);
+}
+
+function updateConveyor(){
+    const belt=document.getElementById('conveyor-belt'),motorFwd=document.getElementById('motor-fwd'),motorRev=document.getElementById('motor-rev');
+    belt.classList.remove('running','reverse');motorFwd.classList.remove('active');motorRev.classList.remove('active','reverse');
+    if(outputState.Q1&&!outputState.Q2){belt.classList.add('running');motorFwd.classList.add('active');}
+    else if(outputState.Q2&&!outputState.Q1){belt.classList.add('reverse');motorRev.classList.add('active','reverse');}
+    
+    // Turn ljós: Q3=R, Q4=Y, Q5=G
+    const lr=document.getElementById('conv-light-r'), ly=document.getElementById('conv-light-y'), lg=document.getElementById('conv-light-g');
+    lr?.classList.toggle('active-r', outputState.Q3);
+    ly?.classList.toggle('active-y', outputState.Q4);
+    lg?.classList.toggle('active-g', outputState.Q5);
+    
+    // Rofar
+    document.getElementById('conv-btn-s1')?.classList.toggle('active', inputState.i1);
+    document.getElementById('conv-btn-s2')?.classList.toggle('active', inputState.i2);
+    
+    const speed=outputState.Q1?3:outputState.Q2?-3:0;
+    const minX=5,maxX=235;
+    boxes.forEach((box)=>{
+        box.x+=speed;
+        if(box.x<minX)box.x=minX;
+        if(box.x>maxX)box.x=maxX;
+        const boxEl=document.getElementById(`box-${box.id}`);
+        if(boxEl)boxEl.style.left=box.x+'px';
+    });
+    const s1=boxes.some(b=>b.x>=5&&b.x<=35),s2=boxes.some(b=>b.x>=110&&b.x<=140),s3=boxes.some(b=>b.x>=225&&b.x<=255);
+    inputState.i3=s1;inputState.i4=s2;inputState.i5=s3;
+    document.getElementById('sensor1-head').classList.toggle('active',s1);document.getElementById('sensor1-beam').classList.toggle('active',s1);
+    document.getElementById('sensor2-head').classList.toggle('active',s2);document.getElementById('sensor2-beam').classList.toggle('active',s2);
+    document.getElementById('sensor3-head').classList.toggle('active',s3);document.getElementById('sensor3-beam').classList.toggle('active',s3);
+}
+function spawnBox(){if(boxes.length>=3)return;boxIdCounter++;const startX=5;boxes.push({x:startX,id:boxIdCounter});const canvas=document.getElementById('conveyor-canvas');const boxEl=document.createElement('div');boxEl.className='box';boxEl.id=`box-${boxIdCounter}`;boxEl.style.left=startX+'px';boxEl.innerHTML='📦';canvas.appendChild(boxEl);}
+function resetConveyor(){boxes.forEach(b=>document.getElementById(`box-${b.id}`)?.remove());boxes=[];inputState.i3=false;inputState.i4=false;inputState.i5=false;updateDisplay();}
+function updateTraffic(){
+    document.getElementById('tl-red').style.background=outputState.Q1?'var(--error)':'#3a1a1a';
+    document.getElementById('tl-red').style.boxShadow=outputState.Q1?'0 0 15px var(--error)':'none';
+    document.getElementById('tl-yellow').style.background=outputState.Q2?'var(--warning)':'#3a3a1a';
+    document.getElementById('tl-yellow').style.boxShadow=outputState.Q2?'0 0 15px var(--warning)':'none';
+    document.getElementById('tl-green').style.background=outputState.Q3?'var(--success)':'#1a3a1a';
+    document.getElementById('tl-green').style.boxShadow=outputState.Q3?'0 0 15px var(--success)':'none';
+}
+
+// Tank level - IA1 uppfærist sjálfkrafa frá dælum/drain
+let tankLevel = 0; // 0-1000
+
+function tankPushInput(inp, down){
+    inputState[inp] = down;
+    const ioBtn = document.querySelector(`[data-input="${inp}"]`);
+    if(ioBtn) ioBtn.classList.toggle('active', down);
+    document.getElementById('tank-btn-i1')?.classList.toggle('active', inputState.i1);
+    document.getElementById('tank-btn-i2')?.classList.toggle('active', inputState.i2);
+}
+
+// Potentiometer drag
+(function(){
+    let dragging = false;
+    let potTouched = false;
+    function updatePot(e){
+        const pot = document.getElementById('tank-pot-body');
+        if(!pot) return;
+        potTouched = true;
+        const rect = pot.getBoundingClientRect();
+        const cx = rect.left + rect.width/2;
+        const cy = rect.top + rect.height/2;
+        const px = (e.touches ? e.touches[0].clientX : e.clientX);
+        const py = (e.touches ? e.touches[0].clientY : e.clientY);
+        let angle = Math.atan2(px - cx, -(py - cy)) * (180/Math.PI);
+        // angle: 0° = upp, ±180° = niður
+        // Snúa um 180° svo 0° sé neðst: dautt svæði efst (kl 10-2)
+        // NEI - við viljum dautt svæði NEÐST
+        // Reikna horn frá BOTNI: flip y
+        let bAngle = Math.atan2(px - cx, (py - cy)) * (180/Math.PI);
+        // bAngle: 0° = niður, ±180° = upp
+        // Virkt svæði: -120 til +120 (240° kringum topp)
+        // Dautt svæði: ±120 til ±180 (120° neðst)
+        if(bAngle > 120) bAngle = 120;
+        if(bAngle < -120) bAngle = -120;
+        // Map -120..+120 til 0-1000 (vinstri=0, hægri=1000)
+        const val = Math.round(((bAngle + 120) / 240) * 1000);
+        // Needle horn: bæta 180° við bAngle til að matcha visual
+        angle = bAngle + 180;
+        analogState.IA2 = val;
+        // Uppfæra slider í IO panel
+        const slider = document.getElementById('analog-IA2');
+        if(slider) slider.value = val;
+        document.getElementById('analog-val-IA2').textContent = val;
+        // Uppfæra pot needle
+        document.getElementById('tank-pot-needle').style.transform = `rotate(${angle}deg)`;
+        document.getElementById('tank-pot-value').textContent = Math.round(val/10) + '%';
+        // Uppfæra setpoint línu á tanki
+        updateSetpointLine();
+    }
+    function updateSetpointLine(){
+        const line = document.getElementById('tank-setpoint-line');
+        if(line){
+            if(potTouched) line.classList.add('visible');
+            const pct = analogState.IA2 / 1000;
+            // Tank top:10px, height:180px
+            line.style.top = (10 + 180 * (1 - pct)) + 'px';
+        }
+    }
+    document.addEventListener('mousedown', e=>{
+        if(e.target.closest('#tank-pot-body')){ dragging=true; updatePot(e); e.preventDefault(); }
+    });
+    document.addEventListener('mousemove', e=>{ if(dragging) updatePot(e); });
+    document.addEventListener('mouseup', ()=>{ dragging=false; });
+    document.addEventListener('touchstart', e=>{
+        if(e.target.closest('#tank-pot-body')){ dragging=true; updatePot(e); }
+    }, {passive:true});
+    document.addEventListener('touchmove', e=>{ if(dragging) updatePot(e); }, {passive:true});
+    document.addEventListener('touchend', ()=>{ dragging=false; });
+    // Expose for updateTank
+    window.updateSetpointLine = updateSetpointLine;
+})();
+
+function updateTankLevel(){
+    // Q1 = Pumpa 1 (hægari), Q2 = Pumpa 2 (hægari), Q3 = Drain
+    const p1 = outputState.Q1;
+    const p2 = outputState.Q2;
+    const drain = outputState.Q3;
+    
+    let fillRate = 0;
+    if(p1) fillRate += 3;   // Pumpa 1: +3/tick
+    if(p2) fillRate += 3;   // Pumpa 2: +3/tick
+    if(drain) fillRate -= 4; // Drain: -4/tick
+    // Þannig: ein pumpa = +3, tvær = +6, drain = -4
+    // Ein pumpa + drain = -1 (drain vinnur), tvær + drain = +2 (dælur vinna)
+    
+    tankLevel = Math.max(0, Math.min(1000, tankLevel + fillRate));
+    
+    // Uppfæra IA1 analog gildi sjálfkrafa
+    analogState.IA1 = tankLevel;
+    const slider = document.getElementById('analog-IA1');
+    if(slider) slider.value = tankLevel;
+    document.getElementById('analog-val-IA1').textContent = tankLevel;
+}
+
+function updateTank(){
+    const waterEl = document.getElementById('tank-water');
+    const levelText = document.getElementById('tank-level-text');
+    const iaDisplay = document.getElementById('tank-ia-value');
+    const ia2Display = document.getElementById('tank-ia2-value');
+    
+    const percent = (tankLevel / 1000) * 100;
+    
+    // Water level
+    if(waterEl){
+        waterEl.style.height = percent + '%';
+        waterEl.classList.toggle('filling', outputState.Q1 || outputState.Q2);
+    }
+    if(levelText) levelText.textContent = tankLevel;
+    if(iaDisplay) iaDisplay.textContent = tankLevel;
+    
+    // Setpoint lína og pot
+    if(window.updateSetpointLine) window.updateSetpointLine();
+    const potVal = document.getElementById('tank-pot-value');
+    if(potVal) potVal.textContent = Math.round(analogState.IA2/10) + '%';
+    
+    // Pumpa 1 - body + pipe + elbow + horiz
+    document.getElementById('tank-pump1-indicator')?.classList.toggle('active', outputState.Q1);
+    document.getElementById('tank-pipe-in1')?.classList.toggle('active', outputState.Q1);
+    document.getElementById('tank-elbow1')?.classList.toggle('active', outputState.Q1);
+    document.getElementById('tank-pipe-h1')?.classList.toggle('active', outputState.Q1);
+    
+    // Pumpa 2
+    document.getElementById('tank-pump2-indicator')?.classList.toggle('active', outputState.Q2);
+    document.getElementById('tank-pipe-in2')?.classList.toggle('active', outputState.Q2);
+    document.getElementById('tank-elbow2')?.classList.toggle('active', outputState.Q2);
+    document.getElementById('tank-pipe-h2')?.classList.toggle('active', outputState.Q2);
+    
+    // Drain - body + pipe + elbow
+    document.getElementById('tank-drain-indicator')?.classList.toggle('active', outputState.Q3);
+    
+    // Turn ljós: Q4=R, Q5=Y, Q6=G
+    document.getElementById('tank-turn-r')?.classList.toggle('active-r', outputState.Q4);
+    document.getElementById('tank-turn-y')?.classList.toggle('active-y', outputState.Q5);
+    document.getElementById('tank-turn-g')?.classList.toggle('active-g', outputState.Q6);
+    
+    // Skynjarar - sjálfkrafa eftir vatnsstigi
+    const hihi = tankLevel >= 950;
+    const hi = tankLevel >= 700;
+    const lo = tankLevel <= 200;
+    const lolo = tankLevel <= 100;
+    
+    inputState.i3 = hihi;
+    inputState.i4 = hi;
+    inputState.i5 = lo;
+    inputState.i6 = lolo;
+    
+    // Uppfæra IO panel takka
+    ['i3','i4','i5','i6'].forEach(inp => {
+        const btn = document.querySelector(`[data-input="${inp}"]`);
+        if(btn) btn.classList.toggle('active', inputState[inp]);
+    });
+    
+    // Uppfæra skynjara á tank
+    document.getElementById('tank-s-hihi')?.classList.toggle('active', hihi);
+    document.getElementById('tank-s-hi')?.classList.toggle('active', hi);
+    document.getElementById('tank-s-lo')?.classList.toggle('active', lo);
+    document.getElementById('tank-s-lolo')?.classList.toggle('active', lolo);
+    
+    // Uppfæra rofa-takka stöðu
+    document.getElementById('tank-btn-i1')?.classList.toggle('active', inputState.i1);
+    document.getElementById('tank-btn-i2')?.classList.toggle('active', inputState.i2);
+}
+
+function resetTank(){
+    tankLevel = 0;
+    analogState.IA1 = 0;
+    const slider = document.getElementById('analog-IA1');
+    if(slider) slider.value = 0;
+    document.getElementById('analog-val-IA1').textContent = '0';
+    inputState.i3=false; inputState.i4=false; inputState.i5=false; inputState.i6=false;
+    updateDisplay();
+}
+init();
+spawnBox();
+</script>
+</body>
+</html>
